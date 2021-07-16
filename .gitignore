@@ -1,3 +1,4 @@
 ﻿backup/*
 .idea
 config/config.php
+log.txt

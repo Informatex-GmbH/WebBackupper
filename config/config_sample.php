@@ -6,8 +6,8 @@ $debug_mode = true;
 $config = [
 
     // ------------------------------------------
-    // Directories for backup
-    // 'Name of Instance' => 'Path to Directory'
+    // Wordpress Instances for backup
+    // 'Name for Backupfile' => 'Path to Directory'
     // ------------------------------------------
     'wpDirectories' => [
         // WP-Directory 1
@@ -17,10 +17,58 @@ $config = [
     ],
 
     // ------------------------------------------
+    // Folder and DB Backup for backup
+    // 'Name for Backupfile' => 'Infos'
+    // ------------------------------------------
+    'webapp' => [
+        // Webapp 1
+        'TestDb' => [
+            'directories' => [
+                // Folder
+                '/home/var/www/folder',
+                '/home/var/www/folder1'
+            ],
+            'db' => [
+                'name' => 'db_name',
+                'host' => 'https://db.host.com',
+                'port' => '3306', // optional
+                'username' => 'username',
+                'password' => 'password'
+            ]
+        ]
+    ],
+
+    // ------------------------------------------
+    // Database for backup
+    // 'Name for Backupfile' => [Login Infos]
+    // ------------------------------------------
+    'db' => [
+        // DB 1
+        'TestDb' => [
+            'name' => 'db_name',
+            'host' => 'https://db.host.com',
+            'port' => '3306', // optional
+            'username' => 'username',
+            'password' => 'password'
+        ]
+    ],
+
+    // ------------------------------------------
+    // Folder for backup
+    // 'Name for Backupfile' => 'Path to Directory'
+    // ------------------------------------------
+    'directories' => [
+        // Folder 1
+        'TestFolder' => '/home/var/www/folder'
+    ],
+
+    // ------------------------------------------
     // Directory
     // -----------------------------------------
-    'sysDirectories' => [
-        'backup' => 'backup'
+    'system' => [
+        // Local Backup Folder
+        'backupDirectory' => 'backup',
+        'sendSuccessMessage' => true
     ],
 
     // ------------------------------------------
