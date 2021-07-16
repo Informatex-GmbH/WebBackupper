@@ -75,7 +75,7 @@ class FolderBackupper {
         }
 
         foreach ($folders as $folder) {
-            $fromFolder = $path .DIRECTORY_SEPARATOR . $folder;
+            $fromFolder = $path . DIRECTORY_SEPARATOR . $folder;
             $toFolder = $tempDir . DIRECTORY_SEPARATOR . $folder;
 
             if (is_dir($fromFolder)) {
@@ -167,7 +167,7 @@ class FolderBackupper {
 
 
     protected function zipFolder(string $sourceDir, string $destinationDir, string $instanceName): string {
-
+        $sourceDir = realpath($sourceDir);
         $destinationDir = realpath($destinationDir);
         $fileName = date('Y-m-d-H-i-s_') . $instanceName . '.zip';
 

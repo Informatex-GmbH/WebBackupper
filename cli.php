@@ -2,11 +2,11 @@
 $config = null;
 
 require 'config/config.php';
-require 'backupper/FTP.php';
-require 'backupper/DbBackupper.php';
-require 'backupper/FolderBackupper.php';
-require 'backupper/WebappBackupper.php';
-require 'backupper/WpBackupper.php';
+require 'classes/FTP.php';
+require 'classes/DbBackupper.php';
+require 'classes/FolderBackupper.php';
+require 'classes/WebappBackupper.php';
+require 'classes/WpBackupper.php';
 
 // Check Config
 if (!isset($config) || !is_array($config)) {
@@ -23,7 +23,7 @@ try {
         unset($wpBackuper);
     }
 
-    if (isset($config['dbs']) && is_array($config['dbs'])) {
+    if (isset($config['databases']) && is_array($config['databases'])) {
         $dbBackuper = new DbBackupper($config, $log);
         $result = $dbBackuper->createBackup();
         unset($dbBackuper);
@@ -46,7 +46,7 @@ try {
     file_put_contents($file, $log, FILE_APPEND);
 
     if ($config['system']['sendSuccessMessage']) {
-        var_dump($log);
+        echo $log;
     }
 
 } catch (Throwable $e) {

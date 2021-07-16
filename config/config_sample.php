@@ -42,7 +42,7 @@ $config = [
     // Database for backup
     // 'Name for Backupfile' => [Login Infos]
     // ------------------------------------------
-    'db' => [
+    'databases' => [
         // DB 1
         'TestDb' => [
             'name' => 'db_name',

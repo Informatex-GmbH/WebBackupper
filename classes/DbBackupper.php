@@ -24,9 +24,9 @@ class DbBackupper {
     }
 
     public function createBackup() {
-        $dbs = $this->config['dbs'];
+        $databases = $this->config['databases'];
 
-        foreach ($dbs as $instanceName => $db) {
+        foreach ($databases as $instanceName => $db) {
 
             $backupDir = $this->config['system']['backupDirectory'] . DIRECTORY_SEPARATOR . $instanceName;
 
