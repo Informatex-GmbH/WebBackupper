@@ -6,45 +6,61 @@ require 'classes/FTP.php';
 require 'classes/DbBackupper.php';
 require 'classes/FolderBackupper.php';
 require 'classes/WebappBackupper.php';
-require 'classes/WpBackupper.php';
+require 'classes/WordpressBackupper.php';
 
-// Check Config
+// check config
 if (!isset($config) || !is_array($config)) {
-    throw new Exception('Could not read Config');
+    throw new Exception('could not read config');
 }
 
 try {
-
     $log = '';
 
-    if (isset($config['wpDirectories']) && is_array($config['wpDirectories'])) {
-        $wpBackuper = new WpBackupper($config, $log);
-        $result = $wpBackuper->createBackup();
-        unset($wpBackuper);
-    }
-
+    // backup databases
     if (isset($config['databases']) && is_array($config['databases'])) {
         $dbBackuper = new DbBackupper($config, $log);
         $result = $dbBackuper->createBackup();
         unset($dbBackuper);
+
+        // write result to logfile
+        $log .= $result;
+        writeMsgToLogFile($result);
     }
 
+    // backup directories
     if (isset($config['directories']) && is_array($config['directories'])) {
         $folderBackuper = new FolderBackupper($config, $log);
         $result = $folderBackuper->createBackup();
         unset($folderBackuper);
+
+        // write result to logfile
+        $log .= $result;
+        writeMsgToLogFile($result);
     }
 
+    // backup wordpress instances
+    if (isset($config['wpDirectories']) && is_array($config['wpDirectories'])) {
+        $wpBackuper = new WordpressBackupper($config, $log);
+        $result = $wpBackuper->createBackup();
+        unset($wpBackuper);
+
+        // write result to logfile
+        $log .= $result;
+        writeMsgToLogFile($result);
+    }
+
+    // backup folders and database to one file
     if (isset($config['webapps']) && is_array($config['webapps'])) {
         $webappBackuper = new WebappBackupper($config, $log);
         $result = $webappBackuper->createBackup();
         unset($webappBackuper);
+
+        // write result to logfile
+        $log .= $result;
+        writeMsgToLogFile($result);
     }
 
-    // write log file
-    $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . 'log.txt';
-    file_put_contents($file, $log, FILE_APPEND);
-
+    // echo msg will generate an crontab mail to web administrator
     if ($config['system']['sendSuccessMessage']) {
         echo $log;
     }
@@ -53,6 +69,10 @@ try {
     $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . 'exceptions.txt';
     $msg = $e->getMessage();
 
+    // echo msg will generate an crontab mail to web administrator
+    echo $msg;
+
+    // write exception to logfile
     if (!is_file($file)) {
         file_put_contents($file, '');
     }
@@ -63,4 +83,14 @@ try {
 
         error_log($message, 3, $file);
     }
+}
+
+/**
+ * write logfile
+ *
+ * @param $msg
+ */
+function writeMsgToLogFile($msg): void {
+    $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . 'log.txt';
+    file_put_contents($file, $msg, FILE_APPEND);
 }
