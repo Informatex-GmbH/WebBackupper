@@ -20,7 +20,7 @@ $config = [
     // Folder and DB Backup for backup
     // 'Name for Backupfile' => 'Infos'
     // ------------------------------------------
-    'webapp' => [
+    'webapps' => [
         // Webapp 1
         'TestDb' => [
             'directories' => [
@@ -63,12 +63,12 @@ $config = [
     ],
 
     // ------------------------------------------
-    // Directory
+    // System
     // -----------------------------------------
     'system' => [
         // Local Backup Folder
         'backupDirectory' => 'backup',
-        'sendSuccessMessage' => true
+        'sendSuccessMessage' => true    // echo a message when finished
     ],
 
     // ------------------------------------------
