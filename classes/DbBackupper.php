@@ -59,7 +59,7 @@ class DbBackupper {
                 unset($ftp);
 
                 if ($uploaded) {
-                    $this->log .= date('d.m.Y H:i:s') . ' Database Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                    $log .= date('d.m.Y H:i:s') . ' Database Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
                 } else {
                     $log .= date('d.m.Y H:i:s') . ' Database Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
                 }

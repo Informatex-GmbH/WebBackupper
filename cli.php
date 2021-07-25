@@ -18,7 +18,7 @@ try {
 
     // backup databases
     if (isset($config['databases']) && is_array($config['databases'])) {
-        $dbBackuper = new DbBackupper($config, $log);
+        $dbBackuper = new DbBackupper($config);
         $result = $dbBackuper->createBackup();
         unset($dbBackuper);
 
@@ -29,7 +29,7 @@ try {
 
     // backup directories
     if (isset($config['directories']) && is_array($config['directories'])) {
-        $folderBackuper = new FolderBackupper($config, $log);
+        $folderBackuper = new FolderBackupper($config);
         $result = $folderBackuper->createBackup();
         unset($folderBackuper);
 
@@ -40,7 +40,7 @@ try {
 
     // backup wordpress instances
     if (isset($config['wpDirectories']) && is_array($config['wpDirectories'])) {
-        $wpBackuper = new WordpressBackupper($config, $log);
+        $wpBackuper = new WordpressBackupper($config);
         $result = $wpBackuper->createBackup();
         unset($wpBackuper);
 
@@ -51,7 +51,7 @@ try {
 
     // backup folders and database to one file
     if (isset($config['webapps']) && is_array($config['webapps'])) {
-        $webappBackuper = new WebappBackupper($config, $log);
+        $webappBackuper = new WebappBackupper($config);
         $result = $webappBackuper->createBackup();
         unset($webappBackuper);
 

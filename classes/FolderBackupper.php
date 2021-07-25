@@ -67,7 +67,7 @@ class FolderBackupper {
                 unset($ftp);
 
                 if ($uploaded) {
-                    $this->log .= date('d.m.Y H:i:s') . ' Folder Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                    $log .= date('d.m.Y H:i:s') . ' Folder Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
                 } else {
                     $log .= date('d.m.Y H:i:s') . ' Folder Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
                 }

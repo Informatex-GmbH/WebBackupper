@@ -51,12 +51,12 @@ class WebappBackupper {
             }
 
             // create database dump
-            $dbBackuper = new DbBackupper($this->config, $this->log);
+            $dbBackuper = new DbBackupper($this->config);
             $dbBackuper->createDbBackup($instanceName, $tempDir, $webapp['db']['host'], $webapp['db']['port'], $webapp['db']['name'], $webapp['db']['username'], $webapp['db']['password']);
             unset($dbBackuper);
 
             // create folder backup
-            $folderBackuper = new FolderBackupper($this->config, $this->log);
+            $folderBackuper = new FolderBackupper($this->config);
             $fileName = $folderBackuper->createFileBackup($instanceName, $tempDir, $backupDir, $webapp['directory'], $webapp['subDirectories']);
 
             // on success

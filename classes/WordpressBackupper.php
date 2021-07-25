@@ -65,12 +65,12 @@ class WordpressBackupper {
                     }
 
                     // create database dump
-                    $dbBackuper = new DbBackupper($this->config, $this->log);
+                    $dbBackuper = new DbBackupper($this->config);
                     $dbBackuper->createDbBackup($instanceName, $tempDir, DB_HOST, null,DB_NAME, DB_USER, DB_PASSWORD);
                     unset($dbBackuper);
 
                     // create folder backup
-                    $folderBackuper = new FolderBackupper($this->config, $this->log);
+                    $folderBackuper = new FolderBackupper($this->config);
                     $fileName = $folderBackuper->createFileBackup($instanceName, $tempDir, $backupDir, $wpDirectory, $this->backupFolders);
 
                     // on success
@@ -85,7 +85,7 @@ class WordpressBackupper {
                         unset($ftp);
 
                         if ($uploaded) {
-                            $this->log .= date('d.m.Y H:i:s') . ' Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                            $log .= date('d.m.Y H:i:s') . ' Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
                         } else {
                             $log .= date('d.m.Y H:i:s') . ' Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
                         }
