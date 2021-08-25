@@ -97,4 +97,4 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
    ```
 
 ### 4. Create cli task
-Create a cli task that runs cli.php with PHP7.4. Everytime the task is running, the backup job will be donne.
+Create a cli task that runs cli.php with PHP7.4. Everytime the task is running, the backup job will be done.
