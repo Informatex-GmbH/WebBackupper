@@ -1,24 +1,20 @@
 <?php
-$config = null;
 
-require 'config/config.php';
 require 'classes/FTP.php';
+require 'classes/General.php';
+require 'classes/Cleanup.php';
 require 'classes/DbBackupper.php';
 require 'classes/FolderBackupper.php';
 require 'classes/WebappBackupper.php';
 require 'classes/WordpressBackupper.php';
 
-// check config
-if (!isset($config) || !is_array($config)) {
-    throw new Exception('could not read config');
-}
-
 try {
     $log = '';
 
     // backup databases
-    if (isset($config['databases']) && is_array($config['databases'])) {
-        $dbBackuper = new DbBackupper($config);
+    $databases = General::getConfig('databases');
+    if (isset($databases) && is_array($databases)) {
+        $dbBackuper = new DbBackupper();
         $result = $dbBackuper->createBackup();
         unset($dbBackuper);
 
@@ -28,10 +24,9 @@ try {
     }
 
     // backup directories
-    if (isset($config['directories']) && is_array($config['directories'])) {
-        $folderBackuper = new FolderBackupper($config);
-        $result = $folderBackuper->createBackup();
-        unset($folderBackuper);
+    $directories= General::getConfig('directories');
+    if (isset($directories) && is_array($directories)) {
+        $result = FolderBackupper::createBackup();
 
         // write result to logfile
         $log .= $result;
@@ -39,10 +34,9 @@ try {
     }
 
     // backup wordpress instances
-    if (isset($config['wpDirectories']) && is_array($config['wpDirectories'])) {
-        $wpBackuper = new WordpressBackupper($config);
-        $result = $wpBackuper->createBackup();
-        unset($wpBackuper);
+    $wpDirectories = General::getConfig('wpDirectories');
+    if (isset($wpDirectories) && is_array($wpDirectories)) {
+        $result = WordpressBackupper::createBackup();
 
         // write result to logfile
         $log .= $result;
@@ -50,18 +44,23 @@ try {
     }
 
     // backup folders and database to one file
-    if (isset($config['webapps']) && is_array($config['webapps'])) {
-        $webappBackuper = new WebappBackupper($config);
-        $result = $webappBackuper->createBackup();
-        unset($webappBackuper);
+    $webapps= General::getConfig('webapps');
+    if (isset($webapps) && is_array($webapps)) {
+        $result = WebappBackupper::createBackup();
 
         // write result to logfile
         $log .= $result;
         writeMsgToLogFile($result);
     }
 
+    $result = Cleanup::localFolder();
+
+    // write result to logfile
+    $log .= $result;
+
+
     // echo msg will generate an crontab mail to web administrator
-    if ($config['system']['sendSuccessMessage']) {
+    if (General::getConfig('system, sendSuccessMessage')) {
         echo $log;
     }
 

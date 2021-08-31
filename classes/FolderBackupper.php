@@ -3,22 +3,9 @@
 
 class FolderBackupper {
 
-    protected array $config;
-
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
-
-    /**
-     * Class constructor
-     *
-     * @param array $config
-     */
-    public function __construct(array $config) {
-        date_default_timezone_set('Europe/Zurich');
-
-        $this->config = $config;
-    }
 
 
     /**
@@ -27,33 +14,21 @@ class FolderBackupper {
      * @return string
      * @throws Throwable
      */
-    public function createBackup(): string {
+    public static function createBackup(): string {
+        date_default_timezone_set('Europe/Zurich');
+        
         $log = '';
-        $folders = $this->config['directories'];
+        $folders = General::getConfig('directories');
 
         // loop folders in db
         foreach ($folders as $instanceName => $folder) {
 
             // define backup and temp folder name for instance
-            $backupDir = $this->config['system']['backupDirectory'] . DIRECTORY_SEPARATOR . $instanceName;
-            $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'backupper' . DIRECTORY_SEPARATOR. $instanceName;
-
-            // create backup folder if not exists
-            if (!is_dir($backupDir)) {
-                if (!mkdir($backupDir, 0777, true)) {
-                    throw new Exception('Folder could not be created: ' . $backupDir);
-                }
-            }
-
-            // create temp folder if not exists
-            if (!is_dir($tempDir)) {
-                if (!mkdir($tempDir, 0777, true)) {
-                    throw new Exception('Folder could not be created: ' . $tempDir);
-                }
-            }
+            $backupDir = General::getBackupDir($instanceName);
+            $tempDir = General::getTempDir($instanceName);
 
             // create zip from folder
-            $fileName = $this->createFileBackup($instanceName, $tempDir, $backupDir, $folder);
+            $fileName = self::createFileBackup($instanceName, $tempDir, $backupDir, $folder);
 
             // on success
             if ($fileName) {
@@ -62,9 +37,7 @@ class FolderBackupper {
                 $log .= date('d.m.Y H:i:s') . ' Folder "' . $instanceName . '" backuped successfully' . "\n";
 
                 // upload file to ftp server
-                $ftp = new FTP($this->config);
-                $uploaded = $ftp->upload($instanceName, $backupDir, $fileName);
-                unset($ftp);
+                $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
                     $log .= date('d.m.Y H:i:s') . ' Folder Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
@@ -93,7 +66,7 @@ class FolderBackupper {
      * @return string
      * @throws Exception
      */
-    public function createFileBackup(string $instanceName, string $tempDir, string $backupDir, string $path, $folders = []): string {
+    public static function createFileBackup(string $instanceName, string $tempDir, string $backupDir, string $path, array $folders = []): string {
 
         // read last folder from path
         if (!$folders) {
@@ -113,15 +86,15 @@ class FolderBackupper {
 
             // copy folder to temp folder
             if (is_dir($fromFolder)) {
-                $this->copyFolder($fromFolder, $toFolder);
+                self::copyFolder($fromFolder, $toFolder);
             }
         }
 
         // create zip from copied folder
-        $fileName = $this->zipFolder($tempDir, $backupDir, $instanceName);
+        $fileName = self::zipFolder($tempDir, $backupDir, $instanceName);
 
         // delete temp folder
-        $this->deleteFolder($tempDir);
+        self::deleteFolder($tempDir);
 
         // return name from zip file
         return $fileName;
@@ -138,7 +111,7 @@ class FolderBackupper {
      * @param string $toFolder
      * @throws Exception
      */
-    protected function copyFolder(string $fromFolder, string $toFolder) {
+    protected static function copyFolder(string $fromFolder, string $toFolder) {
 
         // check if folder exists
         if (!is_dir($fromFolder)) {
@@ -161,7 +134,7 @@ class FolderBackupper {
 
                 // if file is a folder, call this function recursive
                 if (is_dir($fromFolder . DIRECTORY_SEPARATOR . $file)) {
-                    $this->copyFolder($fromFolder . DIRECTORY_SEPARATOR . $file, $toFolder . DIRECTORY_SEPARATOR . $file);
+                    self::copyFolder($fromFolder . DIRECTORY_SEPARATOR . $file, $toFolder . DIRECTORY_SEPARATOR . $file);
 
                 // copy file to new folder
                 } else {
@@ -181,7 +154,7 @@ class FolderBackupper {
      * @param string $path
      * @return bool
      */
-    protected function deleteFolder(string $path): bool {
+    protected static function deleteFolder(string $path): bool {
         $return = true;
 
         // if path is a dir, delete everything inside
@@ -193,7 +166,7 @@ class FolderBackupper {
             // loop through all files an folders
             while (($fileName = readdir($dh)) !== false) {
                 if ($fileName !== '.' && $fileName !== '..') {
-                    $this->deleteFolder($path . DIRECTORY_SEPARATOR . $fileName);
+                    self::deleteFolder($path . DIRECTORY_SEPARATOR . $fileName);
                 }
             }
 
@@ -216,7 +189,7 @@ class FolderBackupper {
     }
 
 
-    protected function zipFolder(string $sourceDir, string $destinationDir, string $instanceName): string {
+    protected static function zipFolder(string $sourceDir, string $destinationDir, string $instanceName): string {
         $sourceDir = realpath($sourceDir);
         $destinationDir = realpath($destinationDir);
         $fileName = date('Y-m-d-H-i-s_') . $instanceName . '.zip';

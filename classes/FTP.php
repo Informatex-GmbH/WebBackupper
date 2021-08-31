@@ -3,22 +3,9 @@
 
 class FTP {
 
-    protected array $config;
-
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
-
-    /**
-     * Class constructor
-     *
-     * @param array $config
-     * @throws \Throwable
-     */
-    public function __construct(array $config) {
-        $this->config = $config;
-    }
-
 
     /**
      * uploads a file to ftp server
@@ -29,18 +16,18 @@ class FTP {
      * @return bool
      * @throws Exception
      */
-    public function upload(string $instanceName, string $backupDir, string $fileName): bool {
+    public static function upload(string $instanceName, string $backupDir, string $fileName): bool {
 
         // check for ftp settings in config
-        if ($this->config['ftp'] && is_array($this->config['ftp'])) {
+        if (General::getConfig('ftp') && is_array(General::getConfig('ftp'))) {
 
             // sned to sftp server
-            if ($this->config['ftp']['isSftp']) {
-                return $this->sendToSftp($instanceName, $backupDir, $fileName, $this->config['ftp']['host'], $this->config['ftp']['port'], $this->config['ftp']['username'], $this->config['ftp']['password']);
+            if (General::getConfig('ftp, isSftp')) {
+                return self::sendToSftp($instanceName, $backupDir, $fileName, General::getConfig('ftp, host'), General::getConfig('ftp, port'), General::getConfig('ftp, username'), General::getConfig('ftp, password'));
 
             // sen dto ftp server
             } else {
-                return $this->sendToFtp($instanceName, $backupDir, $fileName, $this->config['ftp']['host'], $this->config['ftp']['port'], $this->config['ftp']['username'], $this->config['ftp']['password']);
+                return self::sendToFtp($instanceName, $backupDir, $fileName, General::getConfig('ftp, host'), General::getConfig('ftp, port'), General::getConfig('ftp, username'), General::getConfig('ftp, password'));
             }
         }
 
@@ -62,8 +49,9 @@ class FTP {
      * @param string $ftpUsername
      * @param string $ftpPassword
      * @return bool
+     * @throws Exception
      */
-    protected function sendToFtp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, int $ftpPort = null, string $ftpUsername, string $ftpPassword): bool {
+    protected static function sendToFtp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, int $ftpPort = null, string $ftpUsername, string $ftpPassword): bool {
 
         // define default port
         if (!$ftpPort) {
@@ -72,7 +60,7 @@ class FTP {
 
         // set paths
         $sourceFile = $backupDir . DIRECTORY_SEPARATOR . $fileName;
-        $destPath = $this->config['ftp']['folder'] . '/' . $instanceName;
+        $destPath = General::getConfig('ftp, folder') . '/' . $instanceName;
         $destFile = $destPath . '/' . $fileName;
 
         // connect to server
@@ -115,7 +103,7 @@ class FTP {
      * @return bool
      * @throws Exception
      */
-    protected function sendToSftp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, int $ftpPort = null, string $ftpUsername, string $ftpPassword): bool {
+    protected static function sendToSftp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, int $ftpPort = null, string $ftpUsername, string $ftpPassword): bool {
 
         // define default port
         if (!$ftpPort) {
@@ -124,7 +112,7 @@ class FTP {
 
         // set paths
         $sourceFile = $backupDir . DIRECTORY_SEPARATOR . $fileName;
-        $destPath = $this->config['ftp']['folder'] . '/' . $instanceName;
+        $destPath = General::getConfig('ftp, folder') . '/' . $instanceName;
         $destFile = $destPath . '/' . $fileName;
 
         // connect to server
@@ -145,11 +133,16 @@ class FTP {
             // upload file
             $resFile = fopen("ssh2.sftp://{$resSFTP}/" . $destFile, 'w');
             $srcFile = fopen($sourceFile, 'r');
-            stream_copy_to_stream($srcFile, $resFile);
-            fclose($resFile);
-            fclose($srcFile);
 
-            return true;
+            if ($resFile && $srcFile) {
+                stream_copy_to_stream($srcFile, $resFile);
+                fclose($resFile);
+                fclose($srcFile);
+
+                return true;
+            }
+
+            return false;
         } else {
             throw new Exception('Unable to authenticate on server');
         }

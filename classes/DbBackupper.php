@@ -3,23 +3,9 @@
 
 class DbBackupper {
 
-    protected array $config;
-
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
-
-    /**
-     * Class constructor
-     *
-     * @param array $config
-     */
-    public function __construct(array $config) {
-        date_default_timezone_set('Europe/Zurich');
-
-        $this->config = $config;
-    }
-
     
     /**
      * create databases backups foreach database in config
@@ -27,25 +13,20 @@ class DbBackupper {
      * @return string
      * @throws Throwable
      */
-    public function createBackup(): string {
+    public static function createBackup(): string {
+        date_default_timezone_set('Europe/Zurich');
+        
         $log = '';
-        $databases = $this->config['databases'];
+        $databases = General::getConfig('databases');
 
         // loop databases in config
         foreach ($databases as $instanceName => $db) {
 
             // define backup folder name for instance
-            $backupDir = $this->config['system']['backupDirectory'] . DIRECTORY_SEPARATOR . $instanceName;
-
-            // create backup folder if not exists
-            if (!is_dir($backupDir)) {
-                if (!mkdir($backupDir, 0777, true)) {
-                    throw new Exception('Folder could not be created: ' . $backupDir);
-                }
-            }
+            $backupDir = General::getBackupDir($instanceName);
 
             // create database dump
-            $fileName = $this->createDbBackup($instanceName, $backupDir, $db['host'], $db['port'], $db['name'], $db['username'], $db['password']);
+            $fileName = self::createDbBackup($instanceName, $backupDir, $db['host'], $db['port'], $db['name'], $db['username'], $db['password']);
 
             // on success
             if ($fileName) {
@@ -54,9 +35,7 @@ class DbBackupper {
                 $log .= date('d.m.Y H:i:s') . ' Database "' . $instanceName . '" backuped successfully' . "\n";
 
                 // upload file to ftp server
-                $ftp = new FTP($this->config);
-                $uploaded = $ftp->upload($instanceName, $backupDir, $fileName);
-                unset($ftp);
+                $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
                     $log .= date('d.m.Y H:i:s') . ' Database Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
@@ -87,7 +66,7 @@ class DbBackupper {
      * @return string
      * @throws Exception
      */
-    public function createDbBackup(string $instanceName, string $backupDir, string $dbHost, int $dbPort = null, string $dbName, string $dbUser, string $dbPassword): string {
+    public static function createDbBackup(string $instanceName, string $backupDir, string $dbHost, ?int $dbPort, string $dbName, string $dbUser, string $dbPassword): string {
 
         // set path and filename
         $sqlName = $instanceName . '_DB_Backup_' . date('Y-m-d-H-i-s') . '.sql';
@@ -123,7 +102,7 @@ class DbBackupper {
         }
 
         // command for create databse dump
-        $command = $this->config['paths']['mysqldump'] . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file=' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf ' . $variables . ' ' . $dbName . ' > ' . $sqlPath;
+        $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file=' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf ' . $variables . ' ' . $dbName . ' > ' . $sqlPath;
 
         // execute command
         $response = [];

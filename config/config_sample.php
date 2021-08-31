@@ -64,11 +64,18 @@ $config = [
 
     // ------------------------------------------
     // System
-    // -----------------------------------------
+    // ------------------------------------------
     'system' => [
-        // Local Backup Folder
-        'backupDirectory' => 'backup',
-        'sendSuccessMessage' => true    // echo a message when finished
+        'localBackupCopies' => 10,   // number of local backups before delete
+        'sendSuccessMessage' => true // echo a message when finished
+    ],
+
+    // ------------------------------------------
+    // Directory
+    // -----------------------------------------
+    'sysDirectories' => [
+        'backup' => 'backup', // path to backup folder
+        'log' => 'log'        // path to log folder
     ],
 
     // ------------------------------------------

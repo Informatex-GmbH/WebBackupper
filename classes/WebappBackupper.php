@@ -3,21 +3,9 @@
 
 class WebappBackupper {
 
-    protected array $config;
-
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
-
-    /**
-     * Class constructor
-     *
-     * @param array $config
-     */
-    public function __construct(array $config) {
-        $this->config = $config;
-    }
-
 
     /**
      * create databases and folder backups foreach webapp in config
@@ -25,39 +13,24 @@ class WebappBackupper {
      * @return string
      * @throws Throwable
      */
-    public function createBackup(): string {
+    public static function createBackup(): string {
         $log = '';
-        $webapps = $this->config['webapps'];
+        $webapps = General::getConfig('webapps');
 
         // loop webapps in config
         foreach ($webapps as $instanceName => $webapp) {
 
             // define backup and temp folder name for instance
-            $backupDir = $this->config['system']['backupDirectory'] . DIRECTORY_SEPARATOR . $instanceName;
-            $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'backupper' . DIRECTORY_SEPARATOR. $instanceName;
-
-            // create backup folder if not exists
-            if (!is_dir($backupDir)) {
-                if (!mkdir($backupDir, 0777, true)) {
-                    throw new Exception('Folder could not be created: ' . $backupDir);
-                }
-            }
-
-            // create temp folder if not exists
-            if (!is_dir($tempDir)) {
-                if (!mkdir($tempDir, 0777, true)) {
-                    throw new Exception('Folder could not be created: ' . $tempDir);
-                }
-            }
+            $backupDir = General::getBackupDir($instanceName);
+            $tempDir = General::getTempDir($instanceName);
 
             // create database dump
-            $dbBackuper = new DbBackupper($this->config);
+            $dbBackuper = new DbBackupper();
             $dbBackuper->createDbBackup($instanceName, $tempDir, $webapp['db']['host'], $webapp['db']['port'], $webapp['db']['name'], $webapp['db']['username'], $webapp['db']['password']);
             unset($dbBackuper);
 
             // create folder backup
-            $folderBackuper = new FolderBackupper($this->config);
-            $fileName = $folderBackuper->createFileBackup($instanceName, $tempDir, $backupDir, $webapp['directory'], $webapp['subDirectories']);
+            $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $webapp['directory'], $webapp['subDirectories']);
 
             // on success
             if ($fileName) {
@@ -66,9 +39,7 @@ class WebappBackupper {
                 $log .= date('d.m.Y H:i:s') . ' Webapp "' . $instanceName . '" backuped successfully' . "\n";
 
                 // upload file to ftp server
-                $ftp = new FTP($this->config);
-                $uploaded = $ftp->upload($instanceName, $backupDir, $fileName);
-                unset($ftp);
+                $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
                     $log .= date('d.m.Y H:i:s') . ' Webapp Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";

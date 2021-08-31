@@ -3,32 +3,24 @@
 
 class WordpressBackupper {
 
-    protected array $config;
-    protected array $backupFolders = ['wp-content'];
-
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
 
     /**
-     * Class constructor
-     *
-     * @param array $config
-     */
-    public function __construct(array $config) {
-        $this->config = $config;
-    }
-
-
-    /**
      * create wordpress backups foreach wordpress instance in config
      *
+     * @param array $backupFolders
      * @return string
-     * @throws Throwable
+     * @throws Exception
      */
-    public function createBackup(): string {
+    public static function createBackup(array $backupFolders = []): string {
         $log = '';
-        $wpDirectories = $this->config['wpDirectories'];
+        $wpDirectories = General::getConfig('wpDirectories');
+
+        if (!$backupFolders) {
+            $backupFolders = ['wp-content'];
+        }
 
         // loop wordpress instances in config
         foreach ($wpDirectories as $instanceName => $wpDirectory) {
@@ -47,31 +39,19 @@ class WordpressBackupper {
                     require $wpConfigFile;
 
                     // define backup and temp folder name for instance
-                    $backupDir = $this->config['system']['backupDirectory'] . DIRECTORY_SEPARATOR . $instanceName;
-                    $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'backupper' . DIRECTORY_SEPARATOR. $instanceName;
+                    $backupDir = General::getBackupDir($instanceName);
+                    $tempDir = General::getTempDir($instanceName);
 
-                    // create backup folder if not exists
-                    if (!is_dir($backupDir)) {
-                        if (!mkdir($backupDir, 0777, true)) {
-                            throw new Exception('Folder could not be created: ' . $backupDir);
-                        }
-                    }
-
-                    // create temp folder if not exists
-                    if (!is_dir($tempDir)) {
-                        if (!mkdir($tempDir, 0777, true)) {
-                            throw new Exception('Folder could not be created: ' . $tempDir);
-                        }
-                    }
+                    // backup wp-config.php
+                    copy($wpConfigFile, $tempDir . DIRECTORY_SEPARATOR . 'wp-config.php');
 
                     // create database dump
-                    $dbBackuper = new DbBackupper($this->config);
+                    $dbBackuper = new DbBackupper();
                     $dbBackuper->createDbBackup($instanceName, $tempDir, DB_HOST, null,DB_NAME, DB_USER, DB_PASSWORD);
                     unset($dbBackuper);
 
                     // create folder backup
-                    $folderBackuper = new FolderBackupper($this->config);
-                    $fileName = $folderBackuper->createFileBackup($instanceName, $tempDir, $backupDir, $wpDirectory, $this->backupFolders);
+                    $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $wpDirectory, $backupFolders);
 
                     // on success
                     if ($fileName) {
@@ -80,9 +60,7 @@ class WordpressBackupper {
                         $log .= date('d.m.Y H:i:s') . ' Wordpress Instance "' . $instanceName . '" backuped successfully' . "\n";
 
                         // upload file to ftp server
-                        $ftp = new FTP($this->config);
-                        $uploaded = $ftp->upload($instanceName, $backupDir, $fileName);
-                        unset($ftp);
+                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                         if ($uploaded) {
                             $log .= date('d.m.Y H:i:s') . ' Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
