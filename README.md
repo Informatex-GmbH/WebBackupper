@@ -12,14 +12,18 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
 ### 3. Edit config.php file 
 1. Wordpress Instances (if not needed let array empty - ```'wpDirectories' => []```)
     ```
-    'wpDirectories' => [
-        
-        // WP-Directory 1
-        'TestWordpress' => '/home/var/www/site1',
-        
-        // WP-Directory 2
-        'TestWordpress' => '/home/var/www/site2'
-    ]
+    // WP-Directory 1 with default wp-content folder
+   'TestWordpress' => '/home/var/www/site1',
+   // WP-Directory 2 with custom folders
+   'TestWordpress' => [
+       'rootDirectory' => '/home/var/www/site2',
+       'directories' => [
+           // Folder 1
+          'wp-data',
+           // Folder 2
+           'wp-admin'
+       ],
+   ]
     ```
 2. Webapps (database and folders) (if not needed let array empty - ```'webapps' => []```)
     ```
@@ -70,21 +74,27 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
 5. System
     ```
     'system' => [
-   
-        // Local Backup Folder
-        'backupDirectory' => 'backup',
-        'sendSuccessMessage' => true    // echo a message when finished   
-    ]
+        'debug' => $debug_mode,        // is debug mode on
+        'localBackupCopies' => 10,     // number of local backups before delete
+        'timezone' => 'Europe/Zurich', // timezone
+        'sendLogEmail' => true,        // send email to webmaster
+        'webmasterEmailAddress' => 'webmaster@mydomain.com'
+    ],
    ```
-6. Paths
+6. Systemdirectorys
+    ```
+    'sysDirectories' => [
+        'backup' => 'backup', // path to backup folder
+        'log' => 'log'        // path to log folder
+    ],
+   ```
+7. Paths
     ```
     'paths' => [
-   
-        // Path to mysqldump
-        'mysqldump' => '/usr/local/bin'
+        'mysqldump' => '/usr/local/bin' // Path to mysqldump
    ]
    ```
-7. FTP information
+8. FTP information
     ```
     'ftp' => [
         'isSftp' => true,

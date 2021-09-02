@@ -1,6 +1,9 @@
 <?php
+// set working directory for cli
+chdir(dirname(__FILE__));
 
 require 'classes/FTP.php';
+require 'classes/Logger.php';
 require 'classes/General.php';
 require 'classes/Cleanup.php';
 require 'classes/DbBackupper.php';
@@ -9,59 +12,45 @@ require 'classes/WebappBackupper.php';
 require 'classes/WordpressBackupper.php';
 
 try {
-    $log = '';
+    date_default_timezone_set(General::getConfig('system, timezone'));
+
+    Logger::$debug = General::getConfig('system, debug');
 
     // backup databases
     $databases = General::getConfig('databases');
     if (isset($databases) && is_array($databases)) {
-        $dbBackuper = new DbBackupper();
-        $result = $dbBackuper->createBackup();
-        unset($dbBackuper);
-
-        // write result to logfile
-        $log .= $result;
-        writeMsgToLogFile($result);
+        DbBackupper::createBackup();
     }
 
     // backup directories
     $directories= General::getConfig('directories');
     if (isset($directories) && is_array($directories)) {
-        $result = FolderBackupper::createBackup();
-
-        // write result to logfile
-        $log .= $result;
-        writeMsgToLogFile($result);
+        FolderBackupper::createBackup();
     }
 
     // backup wordpress instances
     $wpDirectories = General::getConfig('wpDirectories');
     if (isset($wpDirectories) && is_array($wpDirectories)) {
-        $result = WordpressBackupper::createBackup();
-
-        // write result to logfile
-        $log .= $result;
-        writeMsgToLogFile($result);
+        WordpressBackupper::createBackup();
     }
 
     // backup folders and database to one file
     $webapps= General::getConfig('webapps');
     if (isset($webapps) && is_array($webapps)) {
-        $result = WebappBackupper::createBackup();
-
-        // write result to logfile
-        $log .= $result;
-        writeMsgToLogFile($result);
+        WebappBackupper::createBackup();
     }
 
-    $result = Cleanup::localFolder();
+    // Cleanup local folder
+    Cleanup::localFolder();
 
-    // write result to logfile
-    $log .= $result;
+    // write logfile
+    $log = Logger::getLogAsString();
+    writeMsgToLogFile($log);
 
-
-    // echo msg will generate an crontab mail to web administrator
-    if (General::getConfig('system, sendSuccessMessage')) {
-        echo $log;
+    // send email to webmaster
+    if (General::getConfig('system, sendLogEmail')) {
+        $toEmailAddress = General::getConfig('system, webmasterEmailAddress');
+        $send = mail($toEmailAddress, 'WebBackupper', $log);
     }
 
 } catch (Throwable $e) {
@@ -87,9 +76,9 @@ try {
 /**
  * write logfile
  *
- * @param $msg
+ * @param string $log
  */
-function writeMsgToLogFile($msg): void {
+function writeMsgToLogFile(string $log): void {
     $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . 'log.txt';
-    file_put_contents($file, $msg, FILE_APPEND);
+    file_put_contents($file, $log, FILE_APPEND);
 }

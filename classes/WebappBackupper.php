@@ -10,12 +10,15 @@ class WebappBackupper {
     /**
      * create databases and folder backups foreach webapp in config
      *
-     * @return string
-     * @throws Throwable
+     * @param array|null $webapps
+     * @return bool
+     * @throws Exception
      */
-    public static function createBackup(): string {
-        $log = '';
-        $webapps = General::getConfig('webapps');
+    public static function createBackup(?array $webapps = null): bool {
+
+        if (!$webapps) {
+            $webapps = General::getConfig('webapps');
+        }
 
         // loop webapps in config
         foreach ($webapps as $instanceName => $webapp) {
@@ -25,9 +28,7 @@ class WebappBackupper {
             $tempDir = General::getTempDir($instanceName);
 
             // create database dump
-            $dbBackuper = new DbBackupper();
-            $dbBackuper->createDbBackup($instanceName, $tempDir, $webapp['db']['host'], $webapp['db']['port'], $webapp['db']['name'], $webapp['db']['username'], $webapp['db']['password']);
-            unset($dbBackuper);
+            DbBackupper::createDbBackup($instanceName, $tempDir, $webapp['db']['host'], $webapp['db']['port'], $webapp['db']['name'], $webapp['db']['username'], $webapp['db']['password']);
 
             // create folder backup
             $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $webapp['directory'], $webapp['subDirectories']);
@@ -36,23 +37,23 @@ class WebappBackupper {
             if ($fileName) {
 
                 // set log msg
-                $log .= date('d.m.Y H:i:s') . ' Webapp "' . $instanceName . '" backuped successfully' . "\n";
+                Logger::info('Webapp "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
-                    $log .= date('d.m.Y H:i:s') . ' Webapp Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                    Logger::info('Webapp Backup "' . $instanceName . '" uploaded to FTP successfully');
                 } else {
-                    $log .= date('d.m.Y H:i:s') . ' Webapp Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
+                    Logger::warning('Webapp Backup "' . $instanceName . '" uploaded to FTP failed');
                 }
             } else {
 
                 // set log msg
-                $log .= date('d.m.Y H:i:s') . ' Webapp "' . $instanceName . '" backup failed' . "\n";
+                Logger::error('Webapp "' . $instanceName . '" backup failed');
             }
         }
 
-        return $log;
+        return true;
     }
 }

@@ -5,7 +5,7 @@ class General {
 
 
     public static function getConfig(string $elements = null) {
-        require realpath(dirname($_SERVER['PHP_SELF']) . '/config/config.php');
+        require 'config/config.php';
 
         // check config
         if (!isset($config) || !is_array($config)) {

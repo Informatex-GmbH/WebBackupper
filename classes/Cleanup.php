@@ -34,8 +34,14 @@ class Cleanup {
 
                 // delete files
                 foreach ($filesForDelete as $file) {
-                    unlink($backupDir . DIRECTORY_SEPARATOR . $file);
+                    if (unlink($backupDir . DIRECTORY_SEPARATOR . $file)) {
+                        Logger::debug('file "' . $backupDir . DIRECTORY_SEPARATOR . $file . '" deleted');
+                    } else {
+                        Logger::debug('file "' . $backupDir . DIRECTORY_SEPARATOR . $file . '" could not be deleted');
+                    }
                 }
+
+                Logger::info('Local backupfolder from instance "' . $instanceName . '" cleaned up successfully');
             }
         }
 

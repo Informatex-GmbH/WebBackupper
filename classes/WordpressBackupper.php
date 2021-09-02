@@ -10,20 +10,30 @@ class WordpressBackupper {
     /**
      * create wordpress backups foreach wordpress instance in config
      *
-     * @param array $backupFolders
-     * @return string
+     * @param array|null $wpDirectories
+     * @return bool
      * @throws Exception
      */
-    public static function createBackup(array $backupFolders = []): string {
-        $log = '';
-        $wpDirectories = General::getConfig('wpDirectories');
+    public static function createBackup(array $wpDirectories = null): bool {
 
-        if (!$backupFolders) {
-            $backupFolders = ['wp-content'];
+        if (!$wpDirectories) {
+            $wpDirectories = General::getConfig('wpDirectories');
         }
 
         // loop wordpress instances in config
-        foreach ($wpDirectories as $instanceName => $wpDirectory) {
+        foreach ($wpDirectories as $instanceName => $wpInstance) {
+
+            if (is_array($wpInstance)) {
+                if (!$wpInstance['rootDirectory']) {
+                    throw new Exception('wrong config for wordpress instance "' . $instanceName . '"');
+                }
+                $wpDirectory = $wpInstance['rootDirectory'];
+                $backupFolders = (array)$wpInstance['directories'];
+            } else {
+                $wpDirectory = $wpInstance;
+                $backupFolders = ['wp-content'];
+            }
+
             $directory = realpath($wpDirectory);
 
             // check if folder exists
@@ -38,6 +48,9 @@ class WordpressBackupper {
                     // include config file
                     require $wpConfigFile;
 
+                    // set timezone again because wp overwrite these
+                    date_default_timezone_set(General::getConfig('system, timezone'));
+
                     // define backup and temp folder name for instance
                     $backupDir = General::getBackupDir($instanceName);
                     $tempDir = General::getTempDir($instanceName);
@@ -46,9 +59,7 @@ class WordpressBackupper {
                     copy($wpConfigFile, $tempDir . DIRECTORY_SEPARATOR . 'wp-config.php');
 
                     // create database dump
-                    $dbBackuper = new DbBackupper();
-                    $dbBackuper->createDbBackup($instanceName, $tempDir, DB_HOST, null,DB_NAME, DB_USER, DB_PASSWORD);
-                    unset($dbBackuper);
+                    DbBackupper::createDbBackup($instanceName, $tempDir, DB_HOST, null,DB_NAME, DB_USER, DB_PASSWORD);
 
                     // create folder backup
                     $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $wpDirectory, $backupFolders);
@@ -57,20 +68,20 @@ class WordpressBackupper {
                     if ($fileName) {
 
                         // set log msg
-                        $log .= date('d.m.Y H:i:s') . ' Wordpress Instance "' . $instanceName . '" backuped successfully' . "\n";
+                        Logger::info('Wordpress Instance "' . $instanceName . '" backuped successfully');
 
                         // upload file to ftp server
                         $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                         if ($uploaded) {
-                            $log .= date('d.m.Y H:i:s') . ' Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                            Logger::info('Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP successfully');
                         } else {
-                            $log .= date('d.m.Y H:i:s') . ' Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
+                            Logger::warning('Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP failed');
                         }
                     } else {
 
                         // set log msg
-                        $log .= date('d.m.Y H:i:s') . ' Wordpress Instance "' . $instanceName . '" backup failed' . "\n";
+                        Logger::error('Wordpress Instance "' . $instanceName . '" backup failed');
                     }
 
                 } else {
@@ -82,6 +93,6 @@ class WordpressBackupper {
             }
         }
 
-        return $log;
+        return true;
     }
 }

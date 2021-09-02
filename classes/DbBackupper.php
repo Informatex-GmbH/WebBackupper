@@ -6,18 +6,19 @@ class DbBackupper {
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
-    
+
     /**
      * create databases backups foreach database in config
-     * 
-     * @return string
-     * @throws Throwable
+     *
+     * @param array|null $databases
+     * @return bool
+     * @throws Exception
      */
-    public static function createBackup(): string {
-        date_default_timezone_set('Europe/Zurich');
-        
-        $log = '';
-        $databases = General::getConfig('databases');
+    public static function createBackup(?array $databases = null): bool {
+
+        if (!$databases) {
+            $databases = General::getConfig('databases');
+        }
 
         // loop databases in config
         foreach ($databases as $instanceName => $db) {
@@ -32,24 +33,24 @@ class DbBackupper {
             if ($fileName) {
 
                 // set log msg
-                $log .= date('d.m.Y H:i:s') . ' Database "' . $instanceName . '" backuped successfully' . "\n";
+                Logger::info('Database "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
-                    $log .= date('d.m.Y H:i:s') . ' Database Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                    Logger::info('Database Backup "' . $instanceName . '" uploaded to FTP successfully');
                 } else {
-                    $log .= date('d.m.Y H:i:s') . ' Database Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
+                    Logger::warning('Database Backup "' . $instanceName . '" uploaded to FTP failed');
                 }
             } else {
 
                 // set log msg
-                $log .= date('d.m.Y H:i:s') . ' Database "' . $instanceName . '" backup failed' . "\n";
+                Logger::error(' Database "' . $instanceName . '" backup failed');
             }
         }
 
-        return $log;
+        return true;
     }
 
 
@@ -90,7 +91,7 @@ class DbBackupper {
 
         // write temp access file
         if (!file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf', $fileContent)) {
-            throw new Exception('DB-Access Datei konnte nicht erstellt werden');
+            Logger::error('DB-Access file for instance "' . $instanceName . '" could not be created');
         }
 
         // set variables for dump
@@ -112,10 +113,13 @@ class DbBackupper {
         // remove temp access file
         unlink($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf');
 
-        // throw exception when failed
+        // log error when failed
         if ($status) {
-            throw new Exception('Create DB Dump failed');
+            Logger::error('create DB Dump from instance "' . $instanceName . '" failed');
         }
+
+        // debug log
+        Logger::debug('created DB Dump from instance "' . $instanceName . '"');
 
         // return filename
         return $sqlName;

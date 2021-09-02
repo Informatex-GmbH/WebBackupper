@@ -11,14 +11,15 @@ class FolderBackupper {
     /**
      * create folder backups foreach folder in config
      *
-     * @return string
-     * @throws Throwable
+     * @param array|null $folders
+     * @return bool
+     * @throws Exception
      */
-    public static function createBackup(): string {
-        date_default_timezone_set('Europe/Zurich');
-        
-        $log = '';
-        $folders = General::getConfig('directories');
+    public static function createBackup(?array $folders = null): bool {
+
+        if (!$folders) {
+            $folders = General::getConfig('directories');
+        }
 
         // loop folders in db
         foreach ($folders as $instanceName => $folder) {
@@ -34,24 +35,24 @@ class FolderBackupper {
             if ($fileName) {
 
                 // set log msg
-                $log .= date('d.m.Y H:i:s') . ' Folder "' . $instanceName . '" backuped successfully' . "\n";
+                Logger::info('Folder "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
-                    $log .= date('d.m.Y H:i:s') . ' Folder Backup "' . $instanceName . '" uploaded to FTP successfully' . "\n";
+                    Logger::info('Folder Backup "' . $instanceName . '" uploaded to FTP successfully');
                 } else {
-                    $log .= date('d.m.Y H:i:s') . ' Folder Backup "' . $instanceName . '" uploaded to FTP failed' . "\n";
+                    Logger::warning(' Folder Backup "' . $instanceName . '" uploaded to FTP failed');
                 }
             } else {
 
                 // set log msg
-                $log .= date('d.m.Y H:i:s') . ' Folder "' . $instanceName . '" backup failed' . "\n";
+                Logger::error(' Folder "' . $instanceName . '" backup failed');
             }
         }
 
-        return $log;
+        return true;
     }
 
 

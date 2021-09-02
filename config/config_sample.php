@@ -10,10 +10,18 @@ $config = [
     // 'Name for Backupfile' => 'Path to Directory'
     // ------------------------------------------
     'wpDirectories' => [
-        // WP-Directory 1
+        // WP-Directory 1 with default wp-content folder
         'TestWordpress' => '/home/var/www/site1',
-        // WP-Directory 2
-        'TestWordpress' => '/home/var/www/site2'
+        // WP-Directory 2 with custom folders
+        'TestWordpress' => [
+            'rootDirectory' => '/home/var/www/site2',
+            'directories' => [
+                // Folder 1
+                'wp-data',
+                // Folder 2
+                'wp-admin'
+            ],
+        ]
     ],
 
     // ------------------------------------------
@@ -66,8 +74,11 @@ $config = [
     // System
     // ------------------------------------------
     'system' => [
-        'localBackupCopies' => 10,   // number of local backups before delete
-        'sendSuccessMessage' => true // echo a message when finished
+        'debug' => $debug_mode,        // is debug mode on
+        'localBackupCopies' => 10,     // number of local backups before delete
+        'timezone' => 'Europe/Zurich', // timezone
+        'sendLogEmail' => true,        // send email to webmaster
+        'webmasterEmailAddress' => 'webmaster@mydomain.com'
     ],
 
     // ------------------------------------------
@@ -82,8 +93,7 @@ $config = [
     // Paths
     // ------------------------------------------
     'paths' => [
-        // Path to mysqldump
-        'mysqldump' => '/usr/local/bin'
+        'mysqldump' => '/usr/local/bin' // Path to mysqldump
     ],
 
     // ------------------------------------------
@@ -94,7 +104,7 @@ $config = [
         'host' => 'sftp.mydomain.com',
         'port' => '22',
         'username' => 'backup',
-        'password' => '5sZI^etC&',
+        'password' => '***',
         'folder' => 'backup/web/'
     ]
 ];
