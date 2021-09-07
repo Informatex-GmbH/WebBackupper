@@ -4,6 +4,13 @@
 class General {
 
 
+    /**
+     * returns part of config or the hole config
+     *
+     * @param string|null $elements
+     * @return array
+     * @throws Exception
+     */
     public static function getConfig(string $elements = null) {
         require 'config/config.php';
 
@@ -25,6 +32,12 @@ class General {
     }
 
 
+    /**
+     * returns all instance names in config
+     *
+     * @return array
+     * @throws Exception
+     */
     public static function getInstanceNames(): array {
         $instanceNames = [];
 
@@ -64,6 +77,11 @@ class General {
     }
 
 
+    /**
+     * create backup dir and returns the path
+     *
+     * @throws Exception
+     */
     public static function getBackupDir(string $name): string {
         // define backup folder name for instance
         $backupDir = self::getConfig('sysDirectories, backup') . DIRECTORY_SEPARATOR . $name;
@@ -79,7 +97,14 @@ class General {
     }
 
 
+    /**
+     * create log dir and returns the path
+     *
+     * @return string
+     * @throws Exception
+     */
     public static function getLogDir(): string {
+
         // define log folder
         $logDir = self::getConfig('sysDirectories, log');
 
@@ -94,6 +119,13 @@ class General {
     }
 
 
+    /**
+     * create temp dir and return the path
+     *
+     * @param string $name
+     * @return string
+     * @throws Exception
+     */
     public static function getTempDir(string $name): string {
         // define temp folder name for instance
         $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'backupper' . DIRECTORY_SEPARATOR . $name;

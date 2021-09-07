@@ -77,6 +77,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
         'debug' => $debug_mode,        // is debug mode on
         'localBackupCopies' => 10,     // number of local backups before delete
         'timezone' => 'Europe/Zurich', // timezone
+        'logToFile' => true,           // write log to file
         'sendLogEmail' => true,        // send email to webmaster
         'webmasterEmailAddress' => 'webmaster@mydomain.com'
     ],

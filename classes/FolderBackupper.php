@@ -21,7 +21,7 @@ class FolderBackupper {
             $folders = General::getConfig('directories');
         }
 
-        // loop folders in db
+        // loop folders
         foreach ($folders as $instanceName => $folder) {
 
             // define backup and temp folder name for instance
@@ -88,6 +88,8 @@ class FolderBackupper {
             // copy folder to temp folder
             if (is_dir($fromFolder)) {
                 self::copyFolder($fromFolder, $toFolder);
+            } else {
+                Logger::warning(' Folder "' . $fromFolder . '" does not exist');
             }
         }
 
@@ -116,13 +118,13 @@ class FolderBackupper {
 
         // check if folder exists
         if (!is_dir($fromFolder)) {
-            throw new Exception("Folder $fromFolder doesn't exist");
+            Logger::warning('Folder "' . $fromFolder . '" does not exist');
         }
 
         // create folder if not exists
         if (!is_dir($toFolder)) {
             if (!mkdir($toFolder, 0777, true)) {
-                throw new Exception('Folder could not be created: ' . $toFolder);
+                Logger::warning('Folder "' . $toFolder . '" could not be created');
             }
         }
 
@@ -195,30 +197,29 @@ class FolderBackupper {
         $destinationDir = realpath($destinationDir);
         $fileName = date('Y-m-d-H-i-s_') . $instanceName . '.zip';
 
-        // Initialize archive object
+        // initialize archive object
         $zip = new ZipArchive();
         $zip->open($destinationDir . DIRECTORY_SEPARATOR . $fileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        // Create recursive directory iterator
-        /** @var SplFileInfo[] $files */
+        // create recursive directory iterator
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($sourceDir),
             RecursiveIteratorIterator::LEAVES_ONLY
         );
 
         foreach ($files as $file) {
-            // Skip directories (they would be added automatically)
+            // skip directories (they would be added automatically)
             if (!$file->isDir()) {
-                // Get real and relative path for current file
+                // get real and relative path for current file
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($sourceDir) + 1);
 
-                // Add current file to archive
+                // add current file to archive
                 $zip->addFile($filePath, $relativePath);
             }
         }
 
-        // Zip archive will be created only after closing object
+        // zip archive will be created only after closing object
         $zip->close();
 
         return $fileName;

@@ -22,6 +22,7 @@ class DbBackupper {
 
         // loop databases in config
         foreach ($databases as $instanceName => $db) {
+            Logger::debug('start backup database: ' . $instanceName);
 
             // define backup folder name for instance
             $backupDir = General::getBackupDir($instanceName);
@@ -46,7 +47,7 @@ class DbBackupper {
             } else {
 
                 // set log msg
-                Logger::error(' Database "' . $instanceName . '" backup failed');
+                Logger::error('Database "' . $instanceName . '" backup failed');
             }
         }
 
@@ -89,9 +90,13 @@ class DbBackupper {
         // define content for access file
         $fileContent = "[client]\nhost=$dbHost$dbPort\nuser=$dbUser\npassword=$dbPassword";
 
+        Logger::debug('try to create db-access file for instance "' . $instanceName . '"');
+
         // write temp access file
-        if (!file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf', $fileContent)) {
-            Logger::error('DB-Access file for instance "' . $instanceName . '" could not be created');
+        if (file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf', $fileContent)) {
+            Logger::debug('successfully created db-access file for instance "' . $instanceName . '"');
+        } else {
+            Logger::error('db-access file for instance "' . $instanceName . '" could not be created');
         }
 
         // set variables for dump
@@ -110,16 +115,23 @@ class DbBackupper {
         $status = false;
         exec($command, $response, $status);
 
+        Logger::debug('try to delete db-access file for instance "' . $instanceName . '"');
+
         // remove temp access file
-        unlink($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf');
+        if (unlink($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf')) {
+            Logger::debug('successfully deleted db-access file for instance "' . $instanceName . '"');
+        } else {
+            Logger::warning('could not delete db-access file for instance "' . $instanceName . '"');
+        }
 
         // log error when failed
         if ($status) {
-            Logger::error('create DB Dump from instance "' . $instanceName . '" failed');
+            Logger::error('create DB-dump from instance "' . $instanceName . '" failed');
+            return '';
         }
 
         // debug log
-        Logger::debug('created DB Dump from instance "' . $instanceName . '"');
+        Logger::debug('created DB-dump from instance "' . $instanceName . '"');
 
         // return filename
         return $sqlName;

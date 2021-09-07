@@ -37,20 +37,20 @@ class WebappBackupper {
             if ($fileName) {
 
                 // set log msg
-                Logger::info('Webapp "' . $instanceName . '" backuped successfully');
+                Logger::info('webapp "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
-                    Logger::info('Webapp Backup "' . $instanceName . '" uploaded to FTP successfully');
+                    Logger::info('webapp backup "' . $instanceName . '" uploaded to FTP successfully');
                 } else {
-                    Logger::warning('Webapp Backup "' . $instanceName . '" uploaded to FTP failed');
+                    Logger::warning('webapp backup "' . $instanceName . '" uploaded to FTP failed');
                 }
             } else {
 
                 // set log msg
-                Logger::error('Webapp "' . $instanceName . '" backup failed');
+                Logger::error('webapp "' . $instanceName . '" backup failed');
             }
         }
 
