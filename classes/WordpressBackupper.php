@@ -45,12 +45,6 @@ class WordpressBackupper {
                 // check if wordpress config file exists
                 if (file_exists($wpConfigFile)) {
 
-                    // include config file
-                    require $wpConfigFile;
-
-                    // set timezone again because wp overwrite these
-                    date_default_timezone_set(General::getConfig('system, timezone'));
-
                     // define backup and temp folder name for instance
                     $backupDir = General::getBackupDir($instanceName);
                     $tempDir = General::getTempDir($instanceName);
@@ -58,8 +52,15 @@ class WordpressBackupper {
                     // backup wp-config.php
                     copy($wpConfigFile, $tempDir . DIRECTORY_SEPARATOR . 'wp-config.php');
 
+                    // get content from wpconfig file
+                    $wpConfig = file_get_contents($wpConfigFile);
+                    $dbHost = self::getFromWpConfig($wpConfig, 'DB_HOST');
+                    $dbName = self::getFromWpConfig($wpConfig, 'DB_NAME');
+                    $dbUser = self::getFromWpConfig($wpConfig, 'DB_USER');
+                    $dbPassword = self::getFromWpConfig($wpConfig, 'DB_PASSWORD');
+
                     // create database dump
-                    DbBackupper::createDbBackup($instanceName, $tempDir, DB_HOST, null,DB_NAME, DB_USER, DB_PASSWORD);
+                    DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, null,$dbName, $dbUser, $dbPassword);
 
                     // create folder backup
                     $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $wpDirectory, $backupFolders);
@@ -68,31 +69,44 @@ class WordpressBackupper {
                     if ($fileName) {
 
                         // set log msg
-                        Logger::info('Wordpress Instance "' . $instanceName . '" backuped successfully');
+                        Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
 
                         // upload file to ftp server
                         $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                         if ($uploaded) {
-                            Logger::info('Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP successfully');
+                            Logger::info('wordpress instance backup "' . $instanceName . '" uploaded to FTP successfully');
                         } else {
-                            Logger::warning('Wordpress Instance Backup "' . $instanceName . '" uploaded to FTP failed');
+                            Logger::warning('wordpress instance backup "' . $instanceName . '" uploaded to FTP failed');
                         }
                     } else {
 
                         // set log msg
-                        Logger::error('Wordpress Instance "' . $instanceName . '" backup failed');
+                        Logger::error('wordpress instance "' . $instanceName . '" backup failed');
                     }
 
                 } else {
-                    throw new Exception('wordpress config file does not exist in folder: ' . $wpDirectory);
+                    Logger::error('wordpress config file does not exist in folder: ' . $wpDirectory);
                 }
 
             } else {
-                throw new Exception('folder "' . $wpDirectory . '" does not exist');
+                Logger::error('folder "' . $wpDirectory . '" does not exist');
             }
         }
 
         return true;
+    }
+
+    // Protected
+    protected static function getFromWpConfig(string $wpConfig, string $defineString): ?string {
+        $matches = [];
+        $regex = "/define\(\s*'$defineString',\s*'(.*)'\s*\);/";
+        preg_match($regex, $wpConfig, $matches);
+
+        if ($matches) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }
