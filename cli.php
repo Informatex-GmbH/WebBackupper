@@ -1,4 +1,5 @@
 <?php
+
 // set working directory for cli
 chdir(dirname(__FILE__));
 
@@ -18,7 +19,7 @@ try {
 
     if (General::getConfig('system, logToFile')) {
         Logger::$logToFile = true;
-        Logger::$logFolder = General::getConfig('sysDirectories, log');
+        Logger::$logFolder = General::getLogDir();
     }
 
     // backup databases
@@ -45,7 +46,7 @@ try {
         WebappBackupper::createBackup();
     }
 
-    // Cleanup local folder
+    // cleanup local folder
     Cleanup::localFolder();
 
     // write logfile
@@ -54,11 +55,14 @@ try {
     // send email to webmaster
     if (General::getConfig('system, sendLogEmail')) {
         $toEmailAddress = General::getConfig('system, webmasterEmailAddress');
-        $send = mail($toEmailAddress, 'WebBackupper', $log);
 
-        if (!$send) {
-            $error = error_get_last();
-            throw new Exception($error['message']);
+        if ($toEmailAddress) {
+            $send = mail($toEmailAddress, 'WebBackupper', $log);
+
+            if (!$send) {
+                $error = error_get_last();
+                throw new Exception($error['message']);
+            }
         }
     }
 

@@ -9,7 +9,7 @@ class FolderBackupper {
 
 
     /**
-     * create folder backups foreach folder in config
+     * create folder backups foreach folder
      *
      * @param array|null $folders
      * @return bool
@@ -35,20 +35,20 @@ class FolderBackupper {
             if ($fileName) {
 
                 // set log msg
-                Logger::info('Folder "' . $instanceName . '" backuped successfully');
+                Logger::info('folder "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
 
                 if ($uploaded) {
-                    Logger::info('Folder Backup "' . $instanceName . '" uploaded to FTP successfully');
+                    Logger::info('folder Backup "' . $instanceName . '" uploaded to (s)ftp server successfully');
                 } else {
-                    Logger::warning(' Folder Backup "' . $instanceName . '" uploaded to FTP failed');
+                    Logger::warning('folder Backup "' . $instanceName . '" uploaded to (s)ftp server failed');
                 }
             } else {
 
                 // set log msg
-                Logger::error(' Folder "' . $instanceName . '" backup failed');
+                Logger::error('folder "' . $instanceName . '" backup failed');
             }
         }
 
@@ -192,6 +192,14 @@ class FolderBackupper {
     }
 
 
+    /**
+     * create zip from folder
+     *
+     * @param string $sourceDir
+     * @param string $destinationDir
+     * @param string $instanceName
+     * @return string
+     */
     protected static function zipFolder(string $sourceDir, string $destinationDir, string $instanceName): string {
         $sourceDir = realpath($sourceDir);
         $destinationDir = realpath($destinationDir);
