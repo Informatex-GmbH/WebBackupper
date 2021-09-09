@@ -1,6 +1,7 @@
 <?php
 
 
+
 class WebappBackupper {
 
     // -------------------------------------------------------------------
@@ -10,15 +11,11 @@ class WebappBackupper {
     /**
      * create databases and folder backups foreach webapp in config
      *
-     * @param array|null $webapps
+     * @param array $webapps
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(?array $webapps = null): bool {
-
-        if (!$webapps) {
-            $webapps = General::getConfig('webapps');
-        }
+    public static function createBackup(array $webapps = []): bool {
 
         // loop webapps in config
         foreach ($webapps as $instanceName => $webapp) {

@@ -10,15 +10,11 @@ class DbBackupper {
     /**
      * create databases backups foreach database in config
      *
-     * @param array|null $databases
+     * @param array $databases
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(?array $databases = null): bool {
-
-        if (!$databases) {
-            $databases = General::getConfig('databases');
-        }
+    public static function createBackup(array $databases = []): bool {
 
         // loop databases in config
         foreach ($databases as $instanceName => $db) {

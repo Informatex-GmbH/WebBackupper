@@ -3,89 +3,32 @@
 // set working directory for cli
 chdir(dirname(__FILE__));
 
-require 'classes/FTP.php';
-require 'classes/Logger.php';
-require 'classes/General.php';
-require 'classes/Cleanup.php';
-require 'classes/DbBackupper.php';
-require 'classes/FolderBackupper.php';
-require 'classes/WebappBackupper.php';
-require 'classes/WordpressBackupper.php';
+$config = [];
 
-try {
-    date_default_timezone_set(General::getConfig('system, timezone'));
+require 'Backupper.php';
+require 'config/config.php';
 
-    Logger::$debug = General::getConfig('system, debug');
+// initialize backupper
+$backupper = new Backupper($config);
 
-    if (General::getConfig('system, logToFile')) {
-        Logger::$logToFile = true;
-        Logger::$logFolder = General::getLogDir();
-    }
+// declare instances from config
+$instances = [];
+$instances['databases'] = General::getConfig('databases');
+$instances['directories'] = General::getConfig('directories');
+$instances['wpDirectories'] = General::getConfig('wpDirectories');
+$instances['webapps'] = General::getConfig('webapps');
 
-    // backup databases
-    $databases = General::getConfig('databases');
-    if (isset($databases) && is_array($databases)) {
-        DbBackupper::createBackup();
-    }
+// create backups
+$backupper->createBackup($instances);
 
-    // backup directories
-    $directories = General::getConfig('directories');
-    if (isset($directories) && is_array($directories)) {
-        FolderBackupper::createBackup();
-    }
+// send email to webmaster
+if (General::getConfig('system, sendLogEmail')) {
 
-    // backup wordpress instances
-    $wpDirectories = General::getConfig('wpDirectories');
-    if (isset($wpDirectories) && is_array($wpDirectories)) {
-        WordpressBackupper::createBackup();
-    }
+    // read email address of webmaster
+    $toEmailAddress = General::getConfig('system, webmasterEmailAddress');
 
-    // backup folders and database to one file
-    $webapps = General::getConfig('webapps');
-    if (isset($webapps) && is_array($webapps)) {
-        WebappBackupper::createBackup();
-    }
-
-    // cleanup local folder
-    Cleanup::localFolder();
-
-    // write logfile
+    // read log
     $log = Logger::getLogAsString();
 
-    // send email to webmaster
-    if (General::getConfig('system, sendLogEmail')) {
-        $toEmailAddress = General::getConfig('system, webmasterEmailAddress');
-
-        if ($toEmailAddress) {
-            $send = mail($toEmailAddress, 'WebBackupper', $log);
-
-            if (!$send) {
-                $error = error_get_last();
-                throw new Exception($error['message']);
-            }
-        }
-    }
-
-} catch (Throwable $e) {
-
-    // read message
-    $msg = $e->getMessage();
-
-    // log error
-    Logger::error($msg);
-
-    // define exception file
-    $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . 'exceptions.txt';
-
-    // write exception to logfile
-    if (!is_file($file)) {
-        file_put_contents($file, '');
-    }
-
-    if ($file && is_writable($file)) {
-        $message = date('d.m.Y H:i:s') . ' ';
-        $message .= 'Msg: ' . $msg . "\n";
-
-        error_log($message, 3, $file);
-    }
+    $backupper->sendLogMail($toEmailAddress, $log);
 }

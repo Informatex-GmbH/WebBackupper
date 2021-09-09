@@ -10,15 +10,11 @@ class WordpressBackupper {
     /**
      * create wordpress backups foreach wordpress instance in config
      *
-     * @param array|null $wpDirectories
+     * @param array $wpDirectories
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(array $wpDirectories = null): bool {
-
-        if (!$wpDirectories) {
-            $wpDirectories = General::getConfig('wpDirectories');
-        }
+    public static function createBackup(array $wpDirectories = []): bool {
 
         // loop wordpress instances in config
         foreach ($wpDirectories as $instanceName => $wpInstance) {

@@ -3,6 +3,8 @@
 
 class General {
 
+    public static array $config = [];
+
 
     /**
      * returns part of config or the hole config
@@ -12,12 +14,7 @@ class General {
      * @throws Exception
      */
     public static function getConfig(string $elements = null) {
-        require 'config/config.php';
-
-        // check config
-        if (!isset($config) || !is_array($config)) {
-            throw new Exception('could not read config');
-        }
+        $config = self::$config;
 
         $elements = explode(',', $elements);
         foreach ($elements as $val) {
@@ -83,6 +80,7 @@ class General {
      * @throws Exception
      */
     public static function getBackupDir(string $name): string {
+
         // define backup folder name for instance
         $backupDir = self::getConfig('sysDirectories, backup') . DIRECTORY_SEPARATOR . $name;
 

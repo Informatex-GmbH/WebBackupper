@@ -11,15 +11,11 @@ class FolderBackupper {
     /**
      * create folder backups foreach folder
      *
-     * @param array|null $folders
+     * @param array $folders
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(?array $folders = null): bool {
-
-        if (!$folders) {
-            $folders = General::getConfig('directories');
-        }
+    public static function createBackup(array $folders = []): bool {
 
         // loop folders
         foreach ($folders as $instanceName => $folder) {
@@ -63,7 +59,7 @@ class FolderBackupper {
      * @param string $tempDir
      * @param string $backupDir
      * @param string $path
-     * @param array $folders
+     * @param array  $folders
      * @return string
      * @throws Exception
      */
@@ -87,9 +83,11 @@ class FolderBackupper {
 
             // copy folder to temp folder
             if (is_dir($fromFolder)) {
+                Logger::debug('start to copy folder "' . $fromFolder . '"');
                 self::copyFolder($fromFolder, $toFolder);
+                Logger::debug('finished copying folder "' . $fromFolder . '"');
             } else {
-                Logger::warning(' Folder "' . $fromFolder . '" does not exist');
+                Logger::warning('folder "' . $fromFolder . '" does not exist');
             }
         }
 
@@ -97,7 +95,9 @@ class FolderBackupper {
         $fileName = self::zipFolder($tempDir, $backupDir, $instanceName);
 
         // delete temp folder
+        Logger::debug('start to delete temp folder "' . $tempDir . '"');
         self::deleteFolder($tempDir);
+        Logger::debug('finished deleting temp folder "' . $tempDir . '"');
 
         // return name from zip file
         return $fileName;
@@ -139,7 +139,7 @@ class FolderBackupper {
                 if (is_dir($fromFolder . DIRECTORY_SEPARATOR . $file)) {
                     self::copyFolder($fromFolder . DIRECTORY_SEPARATOR . $file, $toFolder . DIRECTORY_SEPARATOR . $file);
 
-                // copy file to new folder
+                    // copy file to new folder
                 } else {
                     copy($fromFolder . DIRECTORY_SEPARATOR . $file, $toFolder . DIRECTORY_SEPARATOR . $file);
                 }
@@ -181,7 +181,7 @@ class FolderBackupper {
                 $return = false;
             }
 
-        // delete file
+            // delete file
         } else {
             if (!unlink($path)) {
                 $return = false;
@@ -204,6 +204,8 @@ class FolderBackupper {
         $sourceDir = realpath($sourceDir);
         $destinationDir = realpath($destinationDir);
         $fileName = date('Y-m-d-H-i-s_') . $instanceName . '.zip';
+
+        Logger::debug('start to zip folder "' . $sourceDir . '"');
 
         // initialize archive object
         $zip = new ZipArchive();
@@ -229,6 +231,8 @@ class FolderBackupper {
 
         // zip archive will be created only after closing object
         $zip->close();
+
+        Logger::debug('finished zipping folder "' . $sourceDir . '"');
 
         return $fileName;
     }
