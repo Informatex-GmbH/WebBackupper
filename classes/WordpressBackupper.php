@@ -35,6 +35,11 @@ class WordpressBackupper {
             // check if folder exists
             if (is_dir($directory)) {
 
+                // backup folders
+                foreach ($backupFolders as &$backupFolder) {
+                    $backupFolder = $directory . DIRECTORY_SEPARATOR . $backupFolder;
+                }
+
                 // define path for wp-config.php
                 $wpConfigFile = $directory . DIRECTORY_SEPARATOR . 'wp-config.php';
 
@@ -59,7 +64,7 @@ class WordpressBackupper {
                     DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, null,$dbName, $dbUser, $dbPassword);
 
                     // create folder backup
-                    $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $wpDirectory, $backupFolders);
+                    $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $backupFolders);
 
                     // on success
                     if ($fileName) {
@@ -68,13 +73,13 @@ class WordpressBackupper {
                         Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
 
                         // upload file to ftp server
-                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
-
-                        if ($uploaded) {
-                            Logger::info('wordpress instance backup "' . $instanceName . '" uploaded to FTP successfully');
-                        } else {
-                            Logger::warning('wordpress instance backup "' . $instanceName . '" uploaded to FTP failed');
-                        }
+//                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
+//
+//                        if ($uploaded) {
+//                            Logger::info('wordpress instance backup "' . $instanceName . '" uploaded to FTP successfully');
+//                        } else {
+//                            Logger::warning('wordpress instance backup "' . $instanceName . '" uploaded to FTP failed');
+//                        }
                     } else {
 
                         // set log msg

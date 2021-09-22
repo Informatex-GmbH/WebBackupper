@@ -43,16 +43,6 @@ class Backupper {
     public function createBackup(array $instances) {
         try {
 
-            // backup databases
-            if (array_key_exists('databases', $instances) && is_array($instances['databases'])) {
-                DbBackupper::createBackup($instances['databases']);
-            }
-
-            // backup directories
-            if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
-                FolderBackupper::createBackup($instances['directories']);
-            }
-
             // backup wordpress instances
             if (array_key_exists('wpDirectories', $instances) && is_array($instances['wpDirectories'])) {
                 WordpressBackupper::createBackup($instances['wpDirectories']);
@@ -61,6 +51,16 @@ class Backupper {
             // backup folders and database to one file
             if (array_key_exists('webapps', $instances) && is_array($instances['webapps'])) {
                 WebappBackupper::createBackup($instances['webapps']);
+            }
+
+            // backup databases
+            if (array_key_exists('databases', $instances) && is_array($instances['databases'])) {
+                DbBackupper::createBackup($instances['databases']);
+            }
+
+            // backup directories
+            if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
+                FolderBackupper::createBackup($instances['directories']);
             }
 
             // cleanup local folder
@@ -82,13 +82,23 @@ class Backupper {
     public function sendLogMail(string $toEmailAddress, string $log): void {
         try {
 
-            if ($toEmailAddress) {
-                $send = mail($toEmailAddress, 'WebBackupper', $log);
+            if (function_exists('mail')) {
+                Logger::debug('mail function is enabled');
 
-                if (!$send) {
-                    $error = error_get_last();
-                    throw new Exception($error['message']);
+                if ($toEmailAddress) {
+                    $send = mail($toEmailAddress, 'WebBackupper', $log);
+
+                    if ($send) {
+                        Logger::debug('mail successfully sent');
+                    } else {
+                        $error = error_get_last();
+                        throw new Exception($error['message']);
+                    }
+                } else {
+                    Logger::warning('no mail address given');
                 }
+            } else {
+                Logger::debug('mail function is not enabled');
             }
         } catch (Throwable $e) {
             $this->handleException($e);

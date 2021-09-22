@@ -13,10 +13,10 @@ $backupper = new Backupper($config);
 
 // declare instances from config
 $instances = [];
-$instances['databases'] = General::getConfig('databases');
-$instances['directories'] = General::getConfig('directories');
 $instances['wpDirectories'] = General::getConfig('wpDirectories');
 $instances['webapps'] = General::getConfig('webapps');
+$instances['databases'] = General::getConfig('databases');
+$instances['directories'] = General::getConfig('directories');
 
 // create backups
 $backupper->createBackup($instances);

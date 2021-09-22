@@ -18,14 +18,19 @@ class FolderBackupper {
     public static function createBackup(array $folders = []): bool {
 
         // loop folders
-        foreach ($folders as $instanceName => $folder) {
+        foreach ($folders as $instanceName => $folderConfig) {
+
+            $subfolders = $folderConfig;
+            if (!is_array($subfolders)) {
+                $subfolders = [$subfolders];
+            }
 
             // define backup and temp folder name for instance
             $backupDir = General::getBackupDir($instanceName);
             $tempDir = General::getTempDir($instanceName);
 
             // create zip from folder
-            $fileName = self::createFileBackup($instanceName, $tempDir, $backupDir, $folder);
+            $fileName = self::createFileBackup($instanceName, $tempDir, $backupDir, $subfolders);
 
             // on success
             if ($fileName) {
@@ -58,18 +63,11 @@ class FolderBackupper {
      * @param string $instanceName
      * @param string $tempDir
      * @param string $backupDir
-     * @param string $path
-     * @param array  $folders
+     * @param $folders
      * @return string
      * @throws Exception
      */
-    public static function createFileBackup(string $instanceName, string $tempDir, string $backupDir, string $path, array $folders = []): string {
-
-        // read last folder from path
-        if (!$folders) {
-            $folders = basename($path);
-            $path = dirname($path);
-        }
+    public static function createFileBackup(string $instanceName, string $tempDir, string $backupDir, $folders): string {
 
         // make array
         if (!is_array($folders)) {
@@ -78,11 +76,13 @@ class FolderBackupper {
 
         // loop folders
         foreach ($folders as $folder) {
-            $fromFolder = $path . DIRECTORY_SEPARATOR . $folder;
-            $toFolder = $tempDir . DIRECTORY_SEPARATOR . $folder;
+            $fromFolder = realpath($folder);
 
             // copy folder to temp folder
             if (is_dir($fromFolder)) {
+                $folderName = basename($fromFolder);
+                $toFolder = $tempDir . DIRECTORY_SEPARATOR . $folderName;
+
                 Logger::debug('start to copy folder "' . $fromFolder . '"');
                 self::copyFolder($fromFolder, $toFolder);
                 Logger::debug('finished copying folder "' . $fromFolder . '"');

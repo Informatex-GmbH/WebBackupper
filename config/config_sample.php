@@ -66,8 +66,13 @@ $config = [
     // 'Name for Backupfile' => 'Path to Directory'
     // ------------------------------------------
     'directories' => [
-        // Folder 1
-        'TestFolder' => '/home/var/www/folder'
+        // one folder
+        'TestFolder' => '/home/var/www/folder',
+        // multiple folders
+        'TestMultipleFolders' => [
+            '/home/var/www/folder1',
+            '/home/var/www/folder2'
+        ]
     ],
 
     // ------------------------------------------

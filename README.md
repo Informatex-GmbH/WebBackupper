@@ -66,9 +66,13 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
 4. Directories (if not needed let array empty - ```'directories' => []```)
     ```
     'directories' => [
-        
-        // Folder 1
-        'TestFolder' => '/home/var/www/folder'
+        // one folder
+        'TestFolder' => '/home/var/www/folder',
+        // multiple folders
+        'TestMultipleFolders' => [
+            '/home/var/www/folder1',
+            '/home/var/www/folder2'
+        ]
     ]
    ```
 5. System
@@ -80,7 +84,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
         'logToFile' => true,           // write log to file
         'sendLogEmail' => true,        // send email to webmaster
         'webmasterEmailAddress' => 'webmaster@mydomain.com'
-    ],
+    ]
    ```
 6. Systemdirectorys
     ```

@@ -25,13 +25,13 @@ class Cleanup {
                 // get create date from files for deletion
                 foreach ($files as $file) {
                     if ($file !== '.' && $file !== '..') {
-                        $createDate = filectime($backupDir . DIRECTORY_SEPARATOR . $file);
+                        $createDate = filemtime($backupDir . DIRECTORY_SEPARATOR . $file);
                         $sortedFiles[$createDate] = $file;
                     }
                 }
 
                 // sort array by key
-                ksort($sortedFiles);
+                krsort($sortedFiles);
                 $filesForDelete = array_slice($sortedFiles, (int)General::getConfig('system, localBackupCopies'));
 
                 // delete files
