@@ -10,7 +10,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
 ### 1. Copy files to webserver
 ### 2. Copy config_sample.php and name it config.php
 ### 3. Edit config.php file 
-1. Wordpress Instances (if not needed let array empty - ```'wpDirectories' => []```)
+1. Wordpress Instances (if not needed let array empty - ```'wordpress' => []```)
     ```
     // WP-Directory 1 with default wp-content folder
    'TestWordpress' => '/home/var/www/site1',

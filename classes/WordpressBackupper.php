@@ -10,14 +10,14 @@ class WordpressBackupper {
     /**
      * create wordpress backups foreach wordpress instance in config
      *
-     * @param array $wpDirectories
+     * @param array $wordpress
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(array $wpDirectories = []): bool {
+    public static function createBackup(array $wordpress = []): bool {
 
         // loop wordpress instances in config
-        foreach ($wpDirectories as $instanceName => $wpInstance) {
+        foreach ($wordpress as $instanceName => $wpInstance) {
 
             if (is_array($wpInstance)) {
                 if (!$wpInstance['rootDirectory']) {
@@ -73,13 +73,13 @@ class WordpressBackupper {
                         Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
 
                         // upload file to ftp server
-//                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
-//
-//                        if ($uploaded) {
-//                            Logger::info('wordpress instance backup "' . $instanceName . '" uploaded to FTP successfully');
-//                        } else {
-//                            Logger::warning('wordpress instance backup "' . $instanceName . '" uploaded to FTP failed');
-//                        }
+                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
+
+                        if ($uploaded) {
+                            Logger::info('wordpress instance backup "' . $instanceName . '" uploaded to FTP successfully');
+                        } else {
+                            Logger::warning('wordpress instance backup "' . $instanceName . '" uploaded to FTP failed');
+                        }
                     } else {
 
                         // set log msg

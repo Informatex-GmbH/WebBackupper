@@ -55,9 +55,9 @@ class General {
         }
 
         // backup wordpress instances
-        $wpDirectories = General::getConfig('wpDirectories');
-        if (isset($wpDirectories) && is_array($wpDirectories)) {
-            foreach ($wpDirectories as $instanceName => $wpDirectory) {
+        $wordpress = General::getConfig('wordpress');
+        if (isset($wordpress) && is_array($wordpress)) {
+            foreach ($wordpress as $instanceName => $wpDirectory) {
                 $instanceNames[] = $instanceName;
             }
         }

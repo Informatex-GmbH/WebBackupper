@@ -9,7 +9,7 @@ $config = [
     // Wordpress Instances for backup
     // 'Name for Backupfile' => 'Path to Directory'
     // ------------------------------------------
-    'wpDirectories' => [
+    'wordpress' => [
         // WP-Directory 1 with default wp-content folder
         'TestWordpress' => '/home/var/www/site1',
         // WP-Directory 2 with custom folders

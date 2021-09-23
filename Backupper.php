@@ -23,7 +23,7 @@ class Backupper {
         }
         General::$config = $config;
 
-        Logger::$debug = General::getConfig('system, debug');
+        Logger::$debug = General::getConfig('system, debug') ?: false;
         Logger::$logFolder = General::getLogDir();
 
         if (General::getConfig('system, logToFile')) {
@@ -44,8 +44,8 @@ class Backupper {
         try {
 
             // backup wordpress instances
-            if (array_key_exists('wpDirectories', $instances) && is_array($instances['wpDirectories'])) {
-                WordpressBackupper::createBackup($instances['wpDirectories']);
+            if (array_key_exists('wordpress', $instances) && is_array($instances['wordpress'])) {
+                WordpressBackupper::createBackup($instances['wordpress']);
             }
 
             // backup folders and database to one file
