@@ -107,7 +107,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
         'port' => '22',
         'username' => 'backup',
         'password' => '5sZI^etC&',
-        'folder' => 'backup/web/'
+        'path' => 'backup/web/'
    ]
    ```
 

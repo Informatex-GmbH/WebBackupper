@@ -4,6 +4,7 @@
   "keywords": [
     "wordpress", "web", "backup", "backupper", "ftp", "sftp"
   ],
+  "homepage": "https://github.com/ifmx-dev/WebBackupper",
   "license": "MIT",
   "authors": [
     {
