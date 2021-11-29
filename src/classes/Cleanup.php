@@ -1,13 +1,14 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
 
 class Cleanup {
-    
+
     /**
      * cleans up local folder
-     * 
+     *
      * @return string
-     * @throws Throwable
+     * @throws \Throwable
      */
     public static function localFolder(): string {
         $log = '';

@@ -111,6 +111,6 @@ $config = [
         'port' => '22',
         'username' => 'backup',
         'password' => '***',
-        'folder' => 'backup/web/'
+        'path' => 'backup/web/'
     ]
 ];

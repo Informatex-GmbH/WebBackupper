@@ -1,9 +1,11 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
+
 class Logger {
 
-    public static bool $debug = false;
-    public static bool $logToFile = false;
+    public static bool   $debug     = false;
+    public static bool   $logToFile = false;
     public static string $logFolder = '';
 
     protected static array $logEntries = [];
@@ -26,12 +28,12 @@ class Logger {
      * adds an error message to the log
      *
      * @param string $message
-     * @throws Exception
+     * @throws \Exception
      */
     public static function error(string $message): void {
         self::addLogEntry($message, 'error');
 
-        throw new Exception($message);
+        throw new \Exception($message);
     }
 
 
@@ -128,7 +130,7 @@ class Logger {
         $trace['file'] = $bt[1]['file'];
         $trace['line'] = $bt[1]['line'];
 
-        $entry = new stdClass();
+        $entry = new  \stdClass();
         $entry->msg = $message;
         $entry->level = $level;
         $entry->timestamp = date('d.m.Y H:i:s');
@@ -147,10 +149,10 @@ class Logger {
     /**
      * returns an entry as a log string
      *
-     * @param stdClass $entry
+     * @param  \stdClass $entry
      * @return string
      */
-    protected static function getEntryAsString(stdClass $entry): string {
+    protected static function getEntryAsString( \stdClass $entry): string {
         return $entry->timestamp . "\t" . mb_strtoupper($entry->level) . "\t" . $entry->msg . "\n";
     }
 
@@ -158,9 +160,9 @@ class Logger {
     /**
      * writes a log entry to the logfile
      *
-     * @param stdClass $entry
+     * @param  \stdClass $entry
      */
-    protected static function writeToFile(stdClass $entry): void {
+    protected static function writeToFile( \stdClass $entry): void {
         if (self::$logFolder) {
 
             // define log file

@@ -1,6 +1,6 @@
 <?php
 
-
+namespace ifmx\WebBackupper\classes;
 
 class WebappBackupper {
 
@@ -14,7 +14,7 @@ class WebappBackupper {
      * @param array $webapps
      * @param array $ftpConfig
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createBackup(array $webapps = [], array $ftpConfig = []): bool {
 

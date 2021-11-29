@@ -1,36 +1,40 @@
 <?php
 
-require 'classes/FTP.php';
-require 'classes/Logger.php';
-require 'classes/General.php';
-require 'classes/Cleanup.php';
-require 'classes/DbBackupper.php';
-require 'classes/FolderBackupper.php';
-require 'classes/WebappBackupper.php';
-require 'classes/WordpressBackupper.php';
+namespace ifmx\WebBackupper;
+
+use ifmx\WebBackupper\classes;
+
+require_once 'classes/FTP.php';
+require_once 'classes/Logger.php';
+require_once 'classes/General.php';
+require_once 'classes/Cleanup.php';
+require_once 'classes/DbBackupper.php';
+require_once 'classes/FolderBackupper.php';
+require_once 'classes/WebappBackupper.php';
+require_once 'classes/WordpressBackupper.php';
 
 class Backupper {
 
     /**
      * constructor
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct(array $config = null) {
 
         if (!$config || !is_array($config)) {
-            throw new Exception('No config given');
+            throw new \Exception('No config given');
         }
-        General::$config = $config;
+        classes\General::$config = $config;
 
-        Logger::$debug = General::getConfig('system, debug') ?: false;
-        Logger::$logFolder = General::getLogDir();
+        classes\Logger::$debug = classes\General::getConfig('system, debug') ?: false;
+        classes\Logger::$logFolder = classes\General::getLogDir();
 
-        if (General::getConfig('system, logToFile')) {
-            Logger::$logToFile = true;
+        if (classes\General::getConfig('system, logToFile')) {
+            classes\Logger::$logToFile = true;
         }
 
-        date_default_timezone_set(General::getConfig('system, timezone'));
+        date_default_timezone_set(classes\General::getConfig('system, timezone'));
     }
 
 
@@ -49,30 +53,30 @@ class Backupper {
 
             // backup wordpress instances
             if (array_key_exists('wordpress', $instances) && is_array($instances['wordpress'])) {
-                WordpressBackupper::createBackup($instances['wordpress'], $ftpConfig);
+                classes\WordpressBackupper::createBackup($instances['wordpress'], $ftpConfig);
             }
 
             // backup folders and database to one file
             if (array_key_exists('webapps', $instances) && is_array($instances['webapps'])) {
-                WebappBackupper::createBackup($instances['webapps'], $ftpConfig);
+                classes\WebappBackupper::createBackup($instances['webapps'], $ftpConfig);
             }
 
             // backup databases
             if (array_key_exists('databases', $instances) && is_array($instances['databases'])) {
-                DbBackupper::createBackup($instances['databases'], $ftpConfig);
+                classes\DbBackupper::createBackup($instances['databases'], $ftpConfig);
             }
 
             // backup directories
             if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
-                FolderBackupper::createBackup($instances['directories'], $ftpConfig);
+                classes\FolderBackupper::createBackup($instances['directories'], $ftpConfig);
             }
 
             // cleanup local folder
-            Cleanup::localFolder();
+            classes\Cleanup::localFolder();
 
             return true;
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
 
             $this->handleException($e);
 
@@ -87,7 +91,7 @@ class Backupper {
      * @return array
      */
     public function getLog(): array {
-        return Logger::getLogAsArray();
+        return classes\Logger::getLogAsArray();
     }
 
 
@@ -97,7 +101,7 @@ class Backupper {
      * @return string
      */
     public function getLogString(): string {
-        return Logger::getLogAsString();
+        return classes\Logger::getLogAsString();
     }
 
 
@@ -106,30 +110,30 @@ class Backupper {
      *
      * @param string $toEmailAddress
      * @param string $log
-     * @throws Exception
+     * @throws \Exception
      */
     public function sendLogMail(string $toEmailAddress, string $log): void {
         try {
 
             if (function_exists('mail')) {
-                Logger::debug('mail function is enabled');
+                classes\Logger::debug('mail function is enabled');
 
                 if ($toEmailAddress) {
                     $send = mail($toEmailAddress, 'WebBackupper', $log);
 
                     if ($send) {
-                        Logger::debug('mail successfully sent');
+                        classes\Logger::debug('mail successfully sent');
                     } else {
                         $error = error_get_last();
-                        throw new Exception($error['message']);
+                        throw new \Exception($error['message']);
                     }
                 } else {
-                    Logger::warning('no mail address given');
+                    classes\Logger::warning('no mail address given');
                 }
             } else {
-                Logger::debug('mail function is not enabled');
+                classes\Logger::debug('mail function is not enabled');
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->handleException($e);
         }
     }
@@ -153,7 +157,7 @@ class Backupper {
         //Logger::error($msg);
 
         // get log folder
-        $logDir = Logger::$logFolder;
+        $logDir = classes\Logger::$logFolder;
 
         // define exception file
         $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . $logDir . DIRECTORY_SEPARATOR . 'exceptions.txt';

@@ -1,5 +1,6 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
 
 class FolderBackupper {
 
@@ -14,7 +15,7 @@ class FolderBackupper {
      * @param array $folders
      * @param array $ftpConfig
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createBackup(array $folders = [], array $ftpConfig = []): bool {
 
@@ -70,9 +71,9 @@ class FolderBackupper {
      * @param string $instanceName
      * @param string $tempDir
      * @param string $backupDir
-     * @param $folders
+     * @param        $folders
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createFileBackup(string $instanceName, string $tempDir, string $backupDir, $folders): string {
 
@@ -119,7 +120,7 @@ class FolderBackupper {
      *
      * @param string $fromFolder
      * @param string $toFolder
-     * @throws Exception
+     * @throws \Exception
      */
     protected static function copyFolder(string $fromFolder, string $toFolder) {
 
@@ -215,13 +216,13 @@ class FolderBackupper {
         Logger::debug('start to zip folder "' . $sourceDir . '"');
 
         // initialize archive object
-        $zip = new ZipArchive();
-        $zip->open($destinationDir . DIRECTORY_SEPARATOR . $fileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        $zip = new \ZipArchive();
+        $zip->open($destinationDir . DIRECTORY_SEPARATOR . $fileName, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
         // create recursive directory iterator
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($sourceDir),
-            RecursiveIteratorIterator::LEAVES_ONLY
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($sourceDir),
+            \RecursiveIteratorIterator::LEAVES_ONLY
         );
 
         foreach ($files as $file) {

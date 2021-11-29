@@ -1,5 +1,4 @@
 ﻿backup/*
 .idea
-config/config.php
-log.txt
-exceptions.txt
+src/config/config.php
+log

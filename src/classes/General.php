@@ -1,5 +1,6 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
 
 class General {
 
@@ -11,7 +12,7 @@ class General {
      *
      * @param string|null $elements
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     public static function getConfig(string $elements = null) {
         $config = self::$config;
@@ -33,7 +34,7 @@ class General {
      * returns all instance names in config
      *
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     public static function getInstanceNames(): array {
         $instanceNames = [];
@@ -47,7 +48,7 @@ class General {
         }
 
         // backup directories
-        $directories= General::getConfig('directories');
+        $directories = General::getConfig('directories');
         if (isset($directories) && is_array($directories)) {
             foreach ($directories as $instanceName => $directory) {
                 $instanceNames[] = $instanceName;
@@ -63,7 +64,7 @@ class General {
         }
 
         // backup folders and database to one file
-        $webapps= General::getConfig('webapps');
+        $webapps = General::getConfig('webapps');
         if (isset($webapps) && is_array($webapps)) {
             foreach ($webapps as $instanceName => $webapp) {
                 $instanceNames[] = $instanceName;
@@ -77,7 +78,7 @@ class General {
     /**
      * create backup dir and returns the path
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public static function getBackupDir(string $name): string {
 
@@ -87,7 +88,7 @@ class General {
         // create backup folder if not exists
         if (!is_dir($backupDir)) {
             if (!mkdir($backupDir, 0777, true)) {
-                throw new Exception('Folder could not be created: ' . $backupDir);
+                throw new \Exception('Folder could not be created: ' . $backupDir);
             }
         }
 
@@ -99,7 +100,7 @@ class General {
      * create log dir and returns the path
      *
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
     public static function getLogDir(): string {
 
@@ -109,7 +110,7 @@ class General {
         // create temp folder if not exists
         if (!is_dir($logDir)) {
             if (!mkdir($logDir, 0777, true)) {
-                throw new Exception('Folder could not be created: ' . $logDir);
+                throw new \Exception('Folder could not be created: ' . $logDir);
             }
         }
 
@@ -122,7 +123,7 @@ class General {
      *
      * @param string $name
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
     public static function getTempDir(string $name): string {
         // define temp folder name for instance
@@ -131,7 +132,7 @@ class General {
         // create temp folder if not exists
         if (!is_dir($tempDir)) {
             if (!mkdir($tempDir, 0777, true)) {
-                throw new Exception('Folder could not be created: ' . $tempDir);
+                throw new \Exception('Folder could not be created: ' . $tempDir);
             }
         }
 

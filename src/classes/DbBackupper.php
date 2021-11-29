@@ -1,5 +1,6 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
 
 class DbBackupper {
 
@@ -13,7 +14,7 @@ class DbBackupper {
      * @param array $databases
      * @param array $ftpConfig
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createBackup(array $databases = [], array $ftpConfig = []): bool {
 
@@ -61,15 +62,15 @@ class DbBackupper {
     /**
      * creates a database dump
      *
-     * @param string $instanceName
-     * @param string $backupDir
-     * @param string $dbHost
+     * @param string   $instanceName
+     * @param string   $backupDir
+     * @param string   $dbHost
      * @param int|null $dbPort
-     * @param string $dbName
-     * @param string $dbUser
-     * @param string $dbPassword
+     * @param string   $dbName
+     * @param string   $dbUser
+     * @param string   $dbPassword
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createDbBackup(string $instanceName, string $backupDir, string $dbHost, ?int $dbPort, string $dbName, string $dbUser, string $dbPassword): string {
 
@@ -81,7 +82,7 @@ class DbBackupper {
         if ($dbPort) {
             $dbPort = $dbPort;
 
-        // perhaps the port is attached to the hostname
+            // perhaps the port is attached to the hostname
         } else {
             preg_match('/(:\d+)/', $dbHost, $matches);
             if ($matches && $matches[1]) {
@@ -111,12 +112,12 @@ class DbBackupper {
         $variables = '--skip-opt --single-transaction --create-options --add-drop-table --set-charset --disable-keys --extended-insert --quick';
 
         // on localhost add other variable for testing
-//        if ($_SERVER['REMOTE_ADDR'] === '::1') {
-//            $variables .= ' --column-statistics=0';
-//        }
+        //if ($_SERVER['REMOTE_ADDR'] === '::1') {
+            $variables .= ' --column-statistics=0';
+        //}
 
         // command for create databse dump
-        $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath .'"';
+        $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath . '"';
 
         // execute command
         $response = [];
@@ -135,6 +136,7 @@ class DbBackupper {
         // log error when failed
         if ($status) {
             Logger::error('create DB-dump from instance "' . $instanceName . '" failed');
+
             return '';
         }
 

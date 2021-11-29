@@ -1,5 +1,6 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
 
 class WordpressBackupper {
 
@@ -13,7 +14,7 @@ class WordpressBackupper {
      * @param array $wordpress
      * @param array $ftpConfig
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createBackup(array $wordpress = [], array $ftpConfig = []): bool {
 
@@ -22,7 +23,7 @@ class WordpressBackupper {
 
             if (is_array($wpInstance)) {
                 if (!$wpInstance['rootDirectory']) {
-                    throw new Exception('wrong config for wordpress instance "' . $instanceName . '"');
+                    throw new \Exception('wrong config for wordpress instance "' . $instanceName . '"');
                 }
                 $wpDirectory = $wpInstance['rootDirectory'];
                 $backupFolders = (array)$wpInstance['directories'];

@@ -1,5 +1,6 @@
 <?php
 
+namespace ifmx\WebBackupper\classes;
 
 class FTP {
 
@@ -20,7 +21,7 @@ class FTP {
      * @param string   $ftpPath
      * @param int|null $ftpPort
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public static function upload(string $instanceName, string $backupDir, string $fileName, bool $isSftp,  string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
 
@@ -52,7 +53,7 @@ class FTP {
      * @param string   $ftpPath
      * @param int|null $ftpPort
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     protected static function sendToFtp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
         try {
@@ -136,7 +137,7 @@ class FTP {
      * @param string   $ftpPath
      * @param int|null $ftpPort
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     protected static function sendToSftp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
         try {
