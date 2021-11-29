@@ -20,7 +20,7 @@ class Cleanup {
                 $files = scandir($backupDir);
                 $sortedFiles = [];
 
-                Logger::info('start to clean up local backup folder from instance "' . $instanceName . '"');
+                Logger::debug('start to clean up local backup folder from instance "' . $instanceName . '"');
 
                 // get create date from files for deletion
                 foreach ($files as $file) {

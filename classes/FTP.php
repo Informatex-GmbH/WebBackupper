@@ -10,31 +10,27 @@ class FTP {
     /**
      * uploads a file to ftp server
      *
-     * @param string $instanceName
-     * @param string $backupDir
-     * @param string $fileName
+     * @param string   $instanceName
+     * @param string   $backupDir
+     * @param string   $fileName
+     * @param bool     $isSftp
+     * @param string   $ftpHost
+     * @param string   $ftpUsername
+     * @param string   $ftpPassword
+     * @param string   $ftpPath
+     * @param int|null $ftpPort
      * @return bool
      * @throws Exception
      */
-    public static function upload(string $instanceName, string $backupDir, string $fileName): bool {
+    public static function upload(string $instanceName, string $backupDir, string $fileName, bool $isSftp,  string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
 
-        // check for ftp settings in config
-        if (General::getConfig('ftp') && is_array(General::getConfig('ftp'))) {
-            $ftpHost = General::getConfig('ftp, host');
-            $ftpUsername = General::getConfig('ftp, username');
-            $ftpPassword = General::getConfig('ftp, password');
-            $ftpPort = General::getConfig('ftp, port');
+        // send to sftp server
+        if ($isSftp) {
+            return self::sendToSftp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
 
-            // send to sftp server
-            if (General::getConfig('ftp, isSftp')) {
-                return self::sendToSftp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPort);
-
-            // send to ftp server
-            } else {
-                return self::sendToFtp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPort);
-            }
+        // send to ftp server
         } else {
-            Logger::warning('no ftp config in config file');
+            return self::sendToFtp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
         }
 
         return false;
@@ -47,16 +43,18 @@ class FTP {
     /**
      * send file to ftp server
      *
-     * @param string $instanceName
-     * @param string $backupDir
-     * @param string $fileName
-     * @param string $ftpHost
-     * @param string $ftpUsername
-     * @param string $ftpPassword
+     * @param string   $instanceName
+     * @param string   $backupDir
+     * @param string   $fileName
+     * @param string   $ftpHost
+     * @param string   $ftpUsername
+     * @param string   $ftpPassword
+     * @param string   $ftpPath
      * @param int|null $ftpPort
      * @return bool
+     * @throws Exception
      */
-    protected static function sendToFtp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, ?int $ftpPort = null): bool {
+    protected static function sendToFtp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
         try {
 
             Logger::debug('start upload to ftp server');
@@ -68,7 +66,7 @@ class FTP {
 
             // set paths
             $sourceFile = $backupDir . DIRECTORY_SEPARATOR . $fileName;
-            $destPath = General::getConfig('ftp, folder') . '/' . $instanceName;
+            $destPath = $ftpPath . '/' . $instanceName;
             $destFile = $destPath . '/' . $fileName;
 
             Logger::debug('try connect to ftp server');
@@ -129,16 +127,18 @@ class FTP {
     /**
      * send file to sftp server
      *
-     * @param string $instanceName
-     * @param string $backupDir
-     * @param string $fileName
-     * @param string $ftpHost
-     * @param string $ftpUsername
-     * @param string $ftpPassword
+     * @param string   $instanceName
+     * @param string   $backupDir
+     * @param string   $fileName
+     * @param string   $ftpHost
+     * @param string   $ftpUsername
+     * @param string   $ftpPassword
+     * @param string   $ftpPath
      * @param int|null $ftpPort
      * @return bool
+     * @throws Exception
      */
-    protected static function sendToSftp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, ?int $ftpPort = null): bool {
+    protected static function sendToSftp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
         try {
 
             Logger::debug('start upload to sftp server');
@@ -150,7 +150,7 @@ class FTP {
 
             // set paths
             $sourceFile = $backupDir . DIRECTORY_SEPARATOR . $fileName;
-            $destPath = General::getConfig('ftp, folder') . '/' . $instanceName;
+            $destPath = $ftpPath . '/' . $instanceName;
             $destFile = $destPath . '/' . $fileName;
 
             Logger::debug('try connect to sftp server');

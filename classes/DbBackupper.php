@@ -11,10 +11,11 @@ class DbBackupper {
      * create databases backups foreach database in config
      *
      * @param array $databases
+     * @param array $ftpConfig
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(array $databases = []): bool {
+    public static function createBackup(array $databases = [], array $ftpConfig = []): bool {
 
         // loop databases in config
         foreach ($databases as $instanceName => $db) {
@@ -33,7 +34,13 @@ class DbBackupper {
                 Logger::info('Database "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
-                $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
+                $ftpIsSftp = $ftpConfig['isSftp'] ?: General::getConfig('ftp, isSftp');
+                $ftpHost = $ftpConfig['host'] ?: General::getConfig('ftp, host');
+                $ftpUsername = $ftpConfig['username'] ?: General::getConfig('ftp, username');
+                $ftpPassword = $ftpConfig['password'] ?: General::getConfig('ftp, password');
+                $ftpPort = $ftpConfig['port'] ?: General::getConfig('ftp, port');
+                $ftpPath = $ftpConfig['path'] ?: General::getConfig('ftp, path');
+                $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpIsSftp, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
 
                 if ($uploaded) {
                     Logger::info('Database Backup "' . $instanceName . '" uploaded to FTP successfully');
@@ -72,19 +79,24 @@ class DbBackupper {
 
         // check if a port is given
         if ($dbPort) {
-            $dbPort = "\nport=" . $dbPort;
+            $dbPort = $dbPort;
 
         // perhaps the port is attached to the hostname
         } else {
             preg_match('/(:\d+)/', $dbHost, $matches);
             if ($matches && $matches[1]) {
-                $dbPort = "\nport=" . substr($matches[1], 1,);
+                $dbPort = substr($matches[1], 1,);
                 $dbHost = str_replace($matches[1], '', $dbHost);
+            }
+
+            // default Port
+            if (!$dbPort) {
+                $dbPort = 3306;
             }
         }
 
         // define content for access file
-        $fileContent = "[client]\nhost=$dbHost$dbPort\nuser=$dbUser\npassword=$dbPassword";
+        $fileContent = "[client]\nhost=$dbHost\nport=$dbPort\nuser=$dbUser\npassword=$dbPassword";
 
         Logger::debug('try to create db-access file for instance "' . $instanceName . '"');
 
@@ -99,12 +111,12 @@ class DbBackupper {
         $variables = '--skip-opt --single-transaction --create-options --add-drop-table --set-charset --disable-keys --extended-insert --quick';
 
         // on localhost add other variable for testing
-        if ($_SERVER['REMOTE_ADDR'] === '::1') {
-            $variables .= ' --column-statistics=0';
-        }
+//        if ($_SERVER['REMOTE_ADDR'] === '::1') {
+//            $variables .= ' --column-statistics=0';
+//        }
 
         // command for create databse dump
-        $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file=' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf ' . $variables . ' ' . $dbName . ' > ' . $sqlPath;
+        $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath .'"';
 
         // execute command
         $response = [];

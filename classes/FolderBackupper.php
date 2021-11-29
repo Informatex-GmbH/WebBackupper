@@ -12,10 +12,11 @@ class FolderBackupper {
      * create folder backups foreach folder
      *
      * @param array $folders
+     * @param array $ftpConfig
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(array $folders = []): bool {
+    public static function createBackup(array $folders = [], array $ftpConfig = []): bool {
 
         // loop folders
         foreach ($folders as $instanceName => $folderConfig) {
@@ -39,12 +40,18 @@ class FolderBackupper {
                 Logger::info('folder "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
-                $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
+                $ftpIsSftp = $ftpConfig['isSftp'] ?: General::getConfig('ftp, isSftp');
+                $ftpHost = $ftpConfig['host'] ?: General::getConfig('ftp, host');
+                $ftpUsername = $ftpConfig['username'] ?: General::getConfig('ftp, username');
+                $ftpPassword = $ftpConfig['password'] ?: General::getConfig('ftp, password');
+                $ftpPort = $ftpConfig['port'] ?: General::getConfig('ftp, port');
+                $ftpPath = $ftpConfig['path'] ?: General::getConfig('ftp, path');
+                $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpIsSftp, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
 
                 if ($uploaded) {
-                    Logger::info('folder Backup "' . $instanceName . '" uploaded to (s)ftp server successfully');
+                    Logger::info('folder Backup "' . $instanceName . '" uploaded to FTP server successfully');
                 } else {
-                    Logger::warning('folder Backup "' . $instanceName . '" uploaded to (s)ftp server failed');
+                    Logger::warning('folder Backup "' . $instanceName . '" uploaded to FTP server failed');
                 }
             } else {
 
@@ -87,7 +94,7 @@ class FolderBackupper {
                 self::copyFolder($fromFolder, $toFolder);
                 Logger::debug('finished copying folder "' . $fromFolder . '"');
             } else {
-                Logger::warning('folder "' . $fromFolder . '" does not exist');
+                Logger::error('folder "' . $folder . '" does not exist');
             }
         }
 
@@ -118,13 +125,13 @@ class FolderBackupper {
 
         // check if folder exists
         if (!is_dir($fromFolder)) {
-            Logger::warning('Folder "' . $fromFolder . '" does not exist');
+            Logger::error('Folder "' . $fromFolder . '" does not exist');
         }
 
         // create folder if not exists
         if (!is_dir($toFolder)) {
             if (!mkdir($toFolder, 0777, true)) {
-                Logger::warning('Folder "' . $toFolder . '" could not be created');
+                Logger::error('Folder "' . $toFolder . '" could not be created');
             }
         }
 

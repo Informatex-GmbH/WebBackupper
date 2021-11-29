@@ -34,41 +34,70 @@ class Backupper {
     }
 
 
-
     /**
      * make backups from the given instances
      *
      * @param array $instances
+     * @return bool
      */
-    public function createBackup(array $instances) {
+    public function createBackup(array $instances): bool {
         try {
+            $ftpConfig = [];
+            if ($instances['ftpConfig']) {
+                $ftpConfig = $instances['ftpConfig'];
+            }
 
             // backup wordpress instances
             if (array_key_exists('wordpress', $instances) && is_array($instances['wordpress'])) {
-                WordpressBackupper::createBackup($instances['wordpress']);
+                WordpressBackupper::createBackup($instances['wordpress'], $ftpConfig);
             }
 
             // backup folders and database to one file
             if (array_key_exists('webapps', $instances) && is_array($instances['webapps'])) {
-                WebappBackupper::createBackup($instances['webapps']);
+                WebappBackupper::createBackup($instances['webapps'], $ftpConfig);
             }
 
             // backup databases
             if (array_key_exists('databases', $instances) && is_array($instances['databases'])) {
-                DbBackupper::createBackup($instances['databases']);
+                DbBackupper::createBackup($instances['databases'], $ftpConfig);
             }
 
             // backup directories
             if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
-                FolderBackupper::createBackup($instances['directories']);
+                FolderBackupper::createBackup($instances['directories'], $ftpConfig);
             }
 
             // cleanup local folder
             Cleanup::localFolder();
 
+            return true;
+
         } catch (Throwable $e) {
+
             $this->handleException($e);
+
+            return false;
         }
+    }
+
+
+    /**
+     * Returns the Log
+     *
+     * @return array
+     */
+    public function getLog(): array {
+        return Logger::getLogAsArray();
+    }
+
+
+    /**
+     * Returns the Log-String
+     *
+     * @return string
+     */
+    public function getLogString(): string {
+        return Logger::getLogAsString();
     }
 
 
@@ -121,7 +150,7 @@ class Backupper {
         $msg = $e->getMessage();
 
         // log error
-        Logger::error($msg);
+        //Logger::error($msg);
 
         // get log folder
         $logDir = Logger::$logFolder;

@@ -11,10 +11,11 @@ class WordpressBackupper {
      * create wordpress backups foreach wordpress instance in config
      *
      * @param array $wordpress
+     * @param array $ftpConfig
      * @return bool
      * @throws Exception
      */
-    public static function createBackup(array $wordpress = []): bool {
+    public static function createBackup(array $wordpress = [], array $ftpConfig = []): bool {
 
         // loop wordpress instances in config
         foreach ($wordpress as $instanceName => $wpInstance) {
@@ -61,7 +62,7 @@ class WordpressBackupper {
                     $dbPassword = self::getFromWpConfig($wpConfig, 'DB_PASSWORD');
 
                     // create database dump
-                    DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, null,$dbName, $dbUser, $dbPassword);
+                    DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, null, $dbName, $dbUser, $dbPassword);
 
                     // create folder backup
                     $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $backupFolders);
@@ -73,12 +74,19 @@ class WordpressBackupper {
                         Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
 
                         // upload file to ftp server
-                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName);
+                        $ftpIsSftp = $ftpConfig['isSftp'] ?: General::getConfig('ftp, isSftp');
+                        $ftpHost = $ftpConfig['host'] ?: General::getConfig('ftp, host');
+                        $ftpUsername = $ftpConfig['username'] ?: General::getConfig('ftp, username');
+                        $ftpPassword = $ftpConfig['password'] ?: General::getConfig('ftp, password');
+                        $ftpPort = $ftpConfig['port'] ?: General::getConfig('ftp, port');
+                        $ftpPath = $ftpConfig['path'] ?: General::getConfig('ftp, path');
+                        $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpIsSftp, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+
 
                         if ($uploaded) {
-                            Logger::info('wordpress instance backup "' . $instanceName . '" uploaded to FTP successfully');
+                            Logger::info('wordpress backup "' . $instanceName . '" successfully uploaded to FTP');
                         } else {
-                            Logger::warning('wordpress instance backup "' . $instanceName . '" uploaded to FTP failed');
+                            Logger::warning('wordpress backup "' . $instanceName . '" upload to FTP failed');
                         }
                     } else {
 
@@ -97,6 +105,7 @@ class WordpressBackupper {
 
         return true;
     }
+
 
     // Protected
     protected static function getFromWpConfig(string $wpConfig, string $defineString): ?string {
