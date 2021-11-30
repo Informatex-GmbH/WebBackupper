@@ -31,51 +31,6 @@ class General {
 
 
     /**
-     * returns all instance names in config
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public static function getInstanceNames(): array {
-        $instanceNames = [];
-
-        // backup databases
-        $databases = General::getConfig('databases');
-        if (isset($databases) && is_array($databases)) {
-            foreach ($databases as $instanceName => $database) {
-                $instanceNames[] = $instanceName;
-            }
-        }
-
-        // backup directories
-        $directories = General::getConfig('directories');
-        if (isset($directories) && is_array($directories)) {
-            foreach ($directories as $instanceName => $directory) {
-                $instanceNames[] = $instanceName;
-            }
-        }
-
-        // backup wordpress instances
-        $wordpress = General::getConfig('wordpress');
-        if (isset($wordpress) && is_array($wordpress)) {
-            foreach ($wordpress as $instanceName => $wpDirectory) {
-                $instanceNames[] = $instanceName;
-            }
-        }
-
-        // backup folders and database to one file
-        $webapps = General::getConfig('webapps');
-        if (isset($webapps) && is_array($webapps)) {
-            foreach ($webapps as $instanceName => $webapp) {
-                $instanceNames[] = $instanceName;
-            }
-        }
-
-        return $instanceNames;
-    }
-
-
-    /**
      * create backup dir and returns the path
      *
      * @throws \Exception

@@ -41,7 +41,7 @@ class WebappBackupper {
                     $backupFolders[] = $webapp['directory'] . DIRECTORY_SEPARATOR . $subDirectory;
                 }
             } else {
-                $backupFolders = $webapp['directory'];
+                $backupFolders = $webapp['directories'];
             }
 
             // create folder backup
@@ -54,18 +54,14 @@ class WebappBackupper {
                 Logger::info('webapp "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
-                $ftpIsSftp = $ftpConfig['isSftp'] ?: General::getConfig('ftp, isSftp');
-                $ftpHost = $ftpConfig['host'] ?: General::getConfig('ftp, host');
-                $ftpUsername = $ftpConfig['username'] ?: General::getConfig('ftp, username');
-                $ftpPassword = $ftpConfig['password'] ?: General::getConfig('ftp, password');
-                $ftpPort = $ftpConfig['port'] ?: General::getConfig('ftp, port');
-                $ftpPath = $ftpConfig['path'] ?: General::getConfig('ftp, path');
-                $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpIsSftp, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+                if ($ftpConfig) {
+                    $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig['isSftp'], $ftpConfig['host'], $ftpConfig['username'], $ftpConfig['password'], $ftpConfig['path'], $ftpConfig['port']);
 
-                if ($uploaded) {
-                    Logger::info('webapp backup "' . $instanceName . '" uploaded to FTP successfully');
-                } else {
-                    Logger::warning('webapp backup "' . $instanceName . '" uploaded to FTP failed');
+                    if ($uploaded) {
+                        Logger::info('webapp backup "' . $instanceName . '" uploaded to FTP successfully');
+                    } else {
+                        Logger::warning('webapp backup "' . $instanceName . '" uploaded to FTP failed');
+                    }
                 }
             } else {
 

@@ -35,18 +35,14 @@ class DbBackupper {
                 Logger::info('Database "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
-                $ftpIsSftp = $ftpConfig['isSftp'] ?: General::getConfig('ftp, isSftp');
-                $ftpHost = $ftpConfig['host'] ?: General::getConfig('ftp, host');
-                $ftpUsername = $ftpConfig['username'] ?: General::getConfig('ftp, username');
-                $ftpPassword = $ftpConfig['password'] ?: General::getConfig('ftp, password');
-                $ftpPort = $ftpConfig['port'] ?: General::getConfig('ftp, port');
-                $ftpPath = $ftpConfig['path'] ?: General::getConfig('ftp, path');
-                $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpIsSftp, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+                if ($ftpConfig) {
+                    $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig['isSftp'], $ftpConfig['host'], $ftpConfig['username'], $ftpConfig['password'], $ftpConfig['path'], $ftpConfig['port']);
 
-                if ($uploaded) {
-                    Logger::info('Database Backup "' . $instanceName . '" uploaded to FTP successfully');
-                } else {
-                    Logger::warning('Database Backup "' . $instanceName . '" uploaded to FTP failed');
+                    if ($uploaded) {
+                        Logger::info('Database Backup "' . $instanceName . '" uploaded to FTP successfully');
+                    } else {
+                        Logger::warning('Database Backup "' . $instanceName . '" uploaded to FTP failed');
+                    }
                 }
             } else {
 
@@ -112,9 +108,9 @@ class DbBackupper {
         $variables = '--skip-opt --single-transaction --create-options --add-drop-table --set-charset --disable-keys --extended-insert --quick';
 
         // on localhost add other variable for testing
-        //if ($_SERVER['REMOTE_ADDR'] === '::1') {
-            $variables .= ' --column-statistics=0';
-        //}
+//        if ($_SERVER['REMOTE_ADDR'] === '::1') {
+//           $variables .= ' --column-statistics=0';
+//        }
 
         // command for create databse dump
         $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath . '"';

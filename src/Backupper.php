@@ -42,14 +42,12 @@ class Backupper {
      * make backups from the given instances
      *
      * @param array $instances
+     * @param array $ftpConfig
      * @return bool
+     * @throws \Exception
      */
-    public function createBackup(array $instances): bool {
+    public function createBackup(array $instances, array $ftpConfig = []): bool {
         try {
-            $ftpConfig = [];
-            if ($instances['ftpConfig']) {
-                $ftpConfig = $instances['ftpConfig'];
-            }
 
             // backup wordpress instances
             if (array_key_exists('wordpress', $instances) && is_array($instances['wordpress'])) {
@@ -72,7 +70,7 @@ class Backupper {
             }
 
             // cleanup local folder
-            classes\Cleanup::localFolder();
+            classes\Cleanup::localFolder($instances);
 
             return true;
 
@@ -139,6 +137,16 @@ class Backupper {
     }
 
 
+    /**
+     * Sets the callback function for the logger
+     *
+     * @param array $function array contains ['className', 'functionName', [array with args]]
+     */
+    public function setLogCallbackFunction(array $function): void {
+        classes\Logger::setCallbackFunction($function);
+    }
+
+
     // -------------------------------------------------------------------
     // Protected Functions
     // -------------------------------------------------------------------
@@ -147,14 +155,12 @@ class Backupper {
      * Handles an Error
      *
      * @param $e
+     * @throws \Exception
      */
     protected function handleException($e) {
 
         // read message
         $msg = $e->getMessage();
-
-        // log error
-        //Logger::error($msg);
 
         // get log folder
         $logDir = classes\Logger::$logFolder;

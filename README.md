@@ -102,6 +102,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
 8. FTP information
     ```
     'ftp' => [
+        'enabled' => false,
         'isSftp' => true,
         'host' => 'sftp.mydomain.com',
         'port' => '22',

@@ -41,18 +41,14 @@ class FolderBackupper {
                 Logger::info('folder "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
-                $ftpIsSftp = $ftpConfig['isSftp'] ?: General::getConfig('ftp, isSftp');
-                $ftpHost = $ftpConfig['host'] ?: General::getConfig('ftp, host');
-                $ftpUsername = $ftpConfig['username'] ?: General::getConfig('ftp, username');
-                $ftpPassword = $ftpConfig['password'] ?: General::getConfig('ftp, password');
-                $ftpPort = $ftpConfig['port'] ?: General::getConfig('ftp, port');
-                $ftpPath = $ftpConfig['path'] ?: General::getConfig('ftp, path');
-                $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpIsSftp, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+                if ($ftpConfig) {
+                    $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig['isSftp'], $ftpConfig['host'], $ftpConfig['username'], $ftpConfig['password'], $ftpConfig['path'], $ftpConfig['port']);
 
-                if ($uploaded) {
-                    Logger::info('folder Backup "' . $instanceName . '" uploaded to FTP server successfully');
-                } else {
-                    Logger::warning('folder Backup "' . $instanceName . '" uploaded to FTP server failed');
+                    if ($uploaded) {
+                        Logger::info('folder Backup "' . $instanceName . '" uploaded to FTP server successfully');
+                    } else {
+                        Logger::warning('folder Backup "' . $instanceName . '" uploaded to FTP server failed');
+                    }
                 }
             } else {
 

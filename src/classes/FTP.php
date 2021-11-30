@@ -23,7 +23,7 @@ class FTP {
      * @return bool
      * @throws \Exception
      */
-    public static function upload(string $instanceName, string $backupDir, string $fileName, bool $isSftp,  string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
+    public static function upload(string $instanceName, string $backupDir, string $fileName, bool $isSftp, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
 
         // send to sftp server
         if ($isSftp) {
@@ -93,6 +93,7 @@ class FTP {
                             Logger::debug('successfully created folder "' . $destPath . '" on ftp server');
                         } else {
                             Logger::error('could not create folder "' . $destPath . '" on ftp server');
+
                             return false;
                         }
                     }
@@ -180,6 +181,7 @@ class FTP {
                             Logger::debug('successfully created folder "' . $destPath . '" on sftp server');
                         } else {
                             Logger::error('could not create folder "' . $destPath . '" on sftp server');
+
                             return false;
                         }
                     }

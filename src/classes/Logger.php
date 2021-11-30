@@ -8,7 +8,8 @@ class Logger {
     public static bool   $logToFile = false;
     public static string $logFolder = '';
 
-    protected static array $logEntries = [];
+    protected static array $logEntries       = [];
+    protected static array $callbackFunction = []; // ['className', 'functionName', [array with args]]
 
     // -------------------------------------------------------------------
     // Public Functions
@@ -111,6 +112,16 @@ class Logger {
     }
 
 
+    /**
+     * set a callback function witch is called every time a log entry ist written
+     *
+     * @param array $function
+     */
+    public static function setCallbackFunction(array $function): void {
+        self::$callbackFunction = $function;
+    }
+
+
     // -------------------------------------------------------------------
     // Protected Functions
     // -------------------------------------------------------------------
@@ -143,16 +154,31 @@ class Logger {
         if (self::$logToFile) {
             self::writeToFile($entry);
         }
+
+        // call callback function with args
+        if (self::$callbackFunction) {
+            $functionArray = self::$callbackFunction;
+
+            $class = $functionArray[0];
+            $function = $functionArray[1];
+
+            $functionArgs = array_slice($functionArray, 2);
+            $args = array_merge(['entry' => $entry], $functionArgs[0]);
+
+            if (is_callable([$class, $function])) {
+                call_user_func([$class, $function], $args);
+            }
+        }
     }
 
 
     /**
      * returns an entry as a log string
      *
-     * @param  \stdClass $entry
+     * @param \stdClass $entry
      * @return string
      */
-    protected static function getEntryAsString( \stdClass $entry): string {
+    protected static function getEntryAsString(\stdClass $entry): string {
         return $entry->timestamp . "\t" . mb_strtoupper($entry->level) . "\t" . $entry->msg . "\n";
     }
 
@@ -160,13 +186,13 @@ class Logger {
     /**
      * writes a log entry to the logfile
      *
-     * @param  \stdClass $entry
+     * @param \stdClass $entry
      */
-    protected static function writeToFile( \stdClass $entry): void {
+    protected static function writeToFile(\stdClass $entry): void {
         if (self::$logFolder) {
 
             // define log file
-            $logFile = self::$logFolder . DIRECTORY_SEPARATOR . 'log.txt';
+            $logFile = self::$logFolder . DIRECTORY_SEPARATOR . 'web_backupper_log.txt';
 
             // log debug entries to file only if debug mode is on or entry is not debug
             if ($entry->level !== 'debug' || self::$debug) {

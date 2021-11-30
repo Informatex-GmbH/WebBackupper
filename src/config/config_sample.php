@@ -106,6 +106,7 @@ $config = [
     // FTP
     // -----------------------------------------
     'ftp' => [
+        'enabled' => false,
         'isSftp' => true,
         'host' => 'sftp.mydomain.com',
         'port' => '22',
