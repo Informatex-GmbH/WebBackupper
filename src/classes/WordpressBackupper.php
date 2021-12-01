@@ -11,15 +11,15 @@ class WordpressBackupper {
     /**
      * create wordpress backups foreach wordpress instance in config
      *
-     * @param array $wordpress
+     * @param array $instances
      * @param array $ftpConfig
      * @return bool
      * @throws \Exception
      */
-    public static function createBackup(array $wordpress = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
 
         // loop wordpress instances in config
-        foreach ($wordpress as $instanceName => $wpInstance) {
+        foreach ($instances as $instanceName => $wpInstance) {
 
             if (is_array($wpInstance)) {
                 if (!$wpInstance['rootDirectory']) {

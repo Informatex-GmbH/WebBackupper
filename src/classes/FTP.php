@@ -99,6 +99,11 @@ class FTP {
                     }
                     ftp_pasv($connection, true);
 
+                    // get file size
+                    $fileSize = General::getFileSize($sourceFile);
+
+                    Logger::debug('start upload file "' . $destFile . '" to ftp server. file size: ' . $fileSize);
+
                     // upload file
                     if (ftp_put($connection, $destFile, $sourceFile)) {
                         Logger::debug('successfully uploaded file "' . $destFile . '" to ftp server');
@@ -192,7 +197,11 @@ class FTP {
 
                     if ($srcFile) {
                         if ($remFile) {
-                            Logger::debug('start upload file "' . $destFile . '" to sftp server');
+
+                            // get file size
+                            $fileSize = General::getFileSize($sourceFile);
+
+                            Logger::debug('start upload file "' . $destFile . '" to sftp server. file size: ' . $fileSize);
 
                             if (stream_copy_to_stream($srcFile, $remFile)) {
                                 Logger::debug('successfully uploaded file "' . $destFile . '" to sftp server');

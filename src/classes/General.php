@@ -52,6 +52,37 @@ class General {
 
 
     /**
+     * returns the filesize with unit
+     *
+     * @param string $filePath
+     * @return string
+     */
+    public static function getFileSize(string $filePath): string {
+        $realPath = realpath($filePath);
+
+        if ($realPath) {
+            $fileSize = filesize($filePath);
+
+            $unit = 'Byte';
+            if ($fileSize >= 1000000000) {
+                $fileSize = round($fileSize / 1000000000, 2);
+                $unit = 'GB';
+            } else if ($fileSize >= 1000000) {
+                $fileSize = round($fileSize / 1000000, 2);
+                $unit = 'MB';
+            } else if ($fileSize >= 1000) {
+                $fileSize = round($fileSize / 1000);
+                $unit = 'KB';
+            }
+
+            return $fileSize . $unit;
+        }
+
+        return '';
+    }
+
+
+    /**
      * create log dir and returns the path
      *
      * @return string

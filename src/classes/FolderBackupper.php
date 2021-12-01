@@ -12,15 +12,15 @@ class FolderBackupper {
     /**
      * create folder backups foreach folder
      *
-     * @param array $folders
+     * @param array $instances
      * @param array $ftpConfig
      * @return bool
      * @throws \Exception
      */
-    public static function createBackup(array $folders = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
 
         // loop folders
-        foreach ($folders as $instanceName => $folderConfig) {
+        foreach ($instances as $instanceName => $folderConfig) {
 
             $subfolders = $folderConfig;
             if (!is_array($subfolders)) {
@@ -138,14 +138,16 @@ class FolderBackupper {
         // loop trough files in source folder
         while (false !== ($file = readdir($dir))) {
             if ($file != '.' && $file != '..') {
+                $fromFile = $fromFolder . DIRECTORY_SEPARATOR . $file;
+                $toFile = $toFolder . DIRECTORY_SEPARATOR . $file;
 
                 // if file is a folder, call this function recursive
-                if (is_dir($fromFolder . DIRECTORY_SEPARATOR . $file)) {
-                    self::copyFolder($fromFolder . DIRECTORY_SEPARATOR . $file, $toFolder . DIRECTORY_SEPARATOR . $file);
+                if (is_dir($fromFile)) {
+                    self::copyFolder($fromFile, $toFile);
+                } else {
 
                     // copy file to new folder
-                } else {
-                    copy($fromFolder . DIRECTORY_SEPARATOR . $file, $toFolder . DIRECTORY_SEPARATOR . $file);
+                    copy($fromFile, $toFile);
                 }
             }
         }
@@ -236,7 +238,10 @@ class FolderBackupper {
         // zip archive will be created only after closing object
         $zip->close();
 
-        Logger::debug('finished zipping folder "' . $sourceDir . '"');
+        // get file size
+        $fileSize = General::getFileSize($destinationDir . DIRECTORY_SEPARATOR . $fileName);
+
+        Logger::debug('finished zipping folder "' . $sourceDir . '". file size: ' . $fileSize);
 
         return $fileName;
     }

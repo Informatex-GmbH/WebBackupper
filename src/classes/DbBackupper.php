@@ -11,15 +11,15 @@ class DbBackupper {
     /**
      * create databases backups foreach database in config
      *
-     * @param array $databases
+     * @param array $instances
      * @param array $ftpConfig
      * @return bool
      * @throws \Exception
      */
-    public static function createBackup(array $databases = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
 
         // loop databases in config
-        foreach ($databases as $instanceName => $db) {
+        foreach ($instances as $instanceName => $db) {
             Logger::debug('start backup database: ' . $instanceName);
 
             // define backup folder name for instance
@@ -136,8 +136,11 @@ class DbBackupper {
             return '';
         }
 
+        // get file size
+        $fileSize = General::getFileSize($sqlPath);
+
         // debug log
-        Logger::debug('created DB-dump from instance "' . $instanceName . '"');
+        Logger::debug('created DB-dump from instance "' . $instanceName . '". file size: ' . $fileSize);
 
         // return filename
         return $sqlName;

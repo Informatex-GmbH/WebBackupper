@@ -16,10 +16,10 @@ class WebappBackupper {
      * @return bool
      * @throws \Exception
      */
-    public static function createBackup(array $webapps = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
 
         // loop webapps in config
-        foreach ($webapps as $instanceName => $webapp) {
+        foreach ($instances as $instanceName => $webapp) {
 
             // define backup and temp folder name for instance
             $backupDir = General::getBackupDir($instanceName);
