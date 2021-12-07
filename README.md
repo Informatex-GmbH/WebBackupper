@@ -100,17 +100,36 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
    ]
    ```
 8. FTP information
-    ```
-    'ftp' => [
-        'enabled' => false,
-        'isSftp' => true,
-        'host' => 'sftp.mydomain.com',
-        'port' => '22',
-        'username' => 'backup',
-        'password' => '5sZI^etC&',
-        'path' => 'backup/web/'
-   ]
-   ```
+   1. Only one FTP configuration
+       ```
+       'ftp' => [
+           'enabled' => false,
+           'connections' => [
+               'isSftp' => true,
+               'host' => 'sftp.mydomain.com',
+               'port' => '22',
+               'username' => 'backup',
+               'password' => '***',
+               'path' => 'backup/web/'
+           ]
+       ]
+      ```
+   1. Multiple FTP configurations
+       ```
+       'ftp' => [
+           'enabled' => false,
+           'connections' => [
+               'NAS' => [
+                   'isSftp' => true,
+                   'host' => 'sftp.mydomain.com',
+                   'port' => '22',
+                   'username' => 'backup',
+                   'password' => '***',
+                   'path' => 'backup/web/'
+               ]
+           ]
+       ]
+      ```
 
 ### 4. Create cli task
 Create a cli task that runs cli.php with PHP7.4. Everytime the task is running, the backup job will be done.

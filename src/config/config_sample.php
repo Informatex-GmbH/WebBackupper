@@ -107,11 +107,15 @@ $config = [
     // -----------------------------------------
     'ftp' => [
         'enabled' => false,
-        'isSftp' => true,
-        'host' => 'sftp.mydomain.com',
-        'port' => '22',
-        'username' => 'backup',
-        'password' => '***',
-        'path' => 'backup/web/'
+        'connections' => [
+            'NAS' => [
+                'isSftp' => true,
+                'host' => 'sftp.mydomain.com',
+                'port' => '22',
+                'username' => 'backup',
+                'password' => '***',
+                'path' => 'backup/web/'
+            ]
+        ]
     ]
 ];

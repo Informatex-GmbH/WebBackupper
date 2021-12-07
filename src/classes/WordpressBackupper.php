@@ -76,7 +76,7 @@ class WordpressBackupper {
 
                         // upload file to ftp server
                         if ($ftpConfig) {
-                            $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig['isSftp'], $ftpConfig['host'], $ftpConfig['username'], $ftpConfig['password'], $ftpConfig['path'], $ftpConfig['port']);
+                            $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
 
                             if ($uploaded) {
                                 Logger::info('wordpress backup "' . $instanceName . '" successfully uploaded to FTP');

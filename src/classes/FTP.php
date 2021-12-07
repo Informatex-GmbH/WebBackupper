@@ -11,30 +11,39 @@ class FTP {
     /**
      * uploads a file to ftp server
      *
-     * @param string   $instanceName
-     * @param string   $backupDir
-     * @param string   $fileName
-     * @param bool     $isSftp
-     * @param string   $ftpHost
-     * @param string   $ftpUsername
-     * @param string   $ftpPassword
-     * @param string   $ftpPath
-     * @param int|null $ftpPort
+     * @param string $instanceName
+     * @param string $backupDir
+     * @param string $fileName
+     * @param array  $ftpConfigs
      * @return bool
      * @throws \Exception
      */
-    public static function upload(string $instanceName, string $backupDir, string $fileName, bool $isSftp, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
+    public static function upload(string $instanceName, string $backupDir, string $fileName, array $ftpConfigs): bool {
 
-        // send to sftp server
-        if ($isSftp) {
-            return self::sendToSftp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
-
-        // send to ftp server
-        } else {
-            return self::sendToFtp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+        // check if multiple configs are given or not
+        if (!is_array($ftpConfigs[array_keys($ftpConfigs)[0]])) {
+            $ftpConfigs[] = $ftpConfigs;
         }
 
-        return false;
+        foreach ($ftpConfigs as $ftpConfig) {
+            $isSftp = $ftpConfig['isSftp'];
+            $ftpHost = $ftpConfig['host'];
+            $ftpUsername = $ftpConfig['username'];
+            $ftpPassword = $ftpConfig['password'];
+            $ftpPath = $ftpConfig['path'];
+            $ftpPort = $ftpConfig['port'];
+
+            // send to sftp server
+            if ($isSftp) {
+                self::sendToSftp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+
+            // send to ftp server
+            } else {
+                self::sendToFtp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
+            }
+        }
+
+        return true;
     }
 
     // -------------------------------------------------------------------

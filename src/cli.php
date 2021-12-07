@@ -23,12 +23,7 @@ $instances['directories'] = classes\General::getConfig('directories');
 
 $ftpConfig = [];
 if (classes\General::getConfig('ftp, enabled')) {
-    $ftpConfig['isSftp'] = classes\General::getConfig('ftp, isSftp');
-    $ftpConfig['host'] = classes\General::getConfig('ftp, host');
-    $ftpConfig['username'] = classes\General::getConfig('ftp, username');
-    $ftpConfig['password'] = classes\General::getConfig('ftp, password');
-    $ftpConfig['port'] = classes\General::getConfig('ftp, port');
-    $ftpConfig['path'] = classes\General::getConfig('ftp, path');
+    $ftpConfig = classes\General::getConfig('ftp, connections');
 }
 
 // create backups
