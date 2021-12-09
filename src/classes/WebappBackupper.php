@@ -11,12 +11,13 @@ class WebappBackupper {
     /**
      * create databases and folder backups foreach webapp in config
      *
-     * @param array $webapps
+     * @param array $instances
      * @param array $ftpConfig
-     * @return bool
+     * @return array
      * @throws \Exception
      */
-    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): array {
+        $files = [];
 
         // loop webapps in config
         foreach ($instances as $instanceName => $webapp) {
@@ -49,6 +50,7 @@ class WebappBackupper {
 
             // on success
             if ($fileName) {
+                $files[$instanceName] = $fileName;
 
                 // set log msg
                 Logger::info('webapp "' . $instanceName . '" backuped successfully');
@@ -70,6 +72,6 @@ class WebappBackupper {
             }
         }
 
-        return true;
+        return $files;
     }
 }

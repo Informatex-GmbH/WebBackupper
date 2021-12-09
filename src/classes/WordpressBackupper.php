@@ -13,10 +13,11 @@ class WordpressBackupper {
      *
      * @param array $instances
      * @param array $ftpConfig
-     * @return bool
+     * @return array
      * @throws \Exception
      */
-    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): array {
+        $files = [];
 
         // loop wordpress instances in config
         foreach ($instances as $instanceName => $wpInstance) {
@@ -70,6 +71,7 @@ class WordpressBackupper {
 
                     // on success
                     if ($fileName) {
+                        $files[$instanceName] = $fileName;
 
                         // set log msg
                         Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
@@ -99,7 +101,7 @@ class WordpressBackupper {
             }
         }
 
-        return true;
+        return $files;
     }
 
 

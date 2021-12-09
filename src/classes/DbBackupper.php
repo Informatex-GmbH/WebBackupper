@@ -13,10 +13,11 @@ class DbBackupper {
      *
      * @param array $instances
      * @param array $ftpConfig
-     * @return bool
+     * @return array
      * @throws \Exception
      */
-    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): array {
+        $files = [];
 
         // loop databases in config
         foreach ($instances as $instanceName => $db) {
@@ -30,6 +31,7 @@ class DbBackupper {
 
             // on success
             if ($fileName) {
+                $files[$instanceName] = $fileName;
 
                 // set log msg
                 Logger::info('Database "' . $instanceName . '" backuped successfully');
@@ -51,7 +53,7 @@ class DbBackupper {
             }
         }
 
-        return true;
+        return $files;
     }
 
 

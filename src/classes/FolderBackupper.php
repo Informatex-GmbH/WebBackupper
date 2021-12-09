@@ -14,10 +14,11 @@ class FolderBackupper {
      *
      * @param array $instances
      * @param array $ftpConfig
-     * @return bool
+     * @return array
      * @throws \Exception
      */
-    public static function createBackup(array $instances = [], array $ftpConfig = []): bool {
+    public static function createBackup(array $instances = [], array $ftpConfig = []): array {
+        $files = [];
 
         // loop folders
         foreach ($instances as $instanceName => $folderConfig) {
@@ -36,6 +37,7 @@ class FolderBackupper {
 
             // on success
             if ($fileName) {
+                $files[$instanceName] = $fileName;
 
                 // set log msg
                 Logger::info('folder "' . $instanceName . '" backuped successfully');
@@ -57,7 +59,7 @@ class FolderBackupper {
             }
         }
 
-        return true;
+        return $files;
     }
 
 

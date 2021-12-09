@@ -43,36 +43,41 @@ class Backupper {
      *
      * @param array $instances
      * @param array $ftpConfig
-     * @return bool
+     * @param bool  $cleanUpLocalFolder
+     * @return array|false
      * @throws \Exception
      */
-    public function createBackup(array $instances, array $ftpConfig = []): bool {
+    public function createBackup(array $instances, array $ftpConfig = [], bool $cleanUpLocalFolder = true) {
         try {
+
+            $files = [];
 
             // backup wordpress instances
             if (array_key_exists('wordpress', $instances) && is_array($instances['wordpress'])) {
-                classes\WordpressBackupper::createBackup($instances['wordpress'], $ftpConfig);
+                $files['wordpress'] = classes\WordpressBackupper::createBackup($instances['wordpress'], $ftpConfig);
             }
 
             // backup folders and database to one file
             if (array_key_exists('webapps', $instances) && is_array($instances['webapps'])) {
-                classes\WebappBackupper::createBackup($instances['webapps'], $ftpConfig);
+                $files['webapps'] = classes\WebappBackupper::createBackup($instances['webapps'], $ftpConfig);
             }
 
             // backup databases
             if (array_key_exists('databases', $instances) && is_array($instances['databases'])) {
-                classes\DbBackupper::createBackup($instances['databases'], $ftpConfig);
+                $files['databases'] = classes\DbBackupper::createBackup($instances['databases'], $ftpConfig);
             }
 
             // backup directories
             if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
-                classes\FolderBackupper::createBackup($instances['directories'], $ftpConfig);
+                $files['directories'] = classes\FolderBackupper::createBackup($instances['directories'], $ftpConfig);
             }
 
             // cleanup local folder
-            classes\Cleanup::localFolder($instances);
+            if ($cleanUpLocalFolder) {
+                classes\Cleanup::localFolder($instances);
+            }
 
-            return true;
+            return $files;
 
         } catch (\Throwable $e) {
 
