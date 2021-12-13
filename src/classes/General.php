@@ -11,7 +11,6 @@ class General {
      * returns part of config or the hole config
      *
      * @param string|null $elements
-     * @return array
      * @throws \Exception
      */
     public static function getConfig(string $elements = null) {
@@ -19,10 +18,14 @@ class General {
 
         $elements = explode(',', $elements);
         foreach ($elements as $val) {
-            if ($config[trim($val)] === false) {
-                $config = false;
+            if ($config && array_key_exists(trim($val), $config)) {
+                if ($config[trim($val)] === false) {
+                    $config = false;
+                } else {
+                    $config = empty($config[trim($val)]) ? null : $config[trim($val)];
+                }
             } else {
-                $config = empty($config[trim($val)]) ? null : $config[trim($val)];
+                $config = null;
             }
         }
 
@@ -64,14 +67,14 @@ class General {
             $fileSize = filesize($filePath);
 
             $unit = 'Byte';
-            if ($fileSize >= 1000000000) {
-                $fileSize = round($fileSize / 1000000000, 2);
+            if ($fileSize >= 1073741824) {
+                $fileSize = round($fileSize / 1073741824, 2);
                 $unit = 'GB';
-            } else if ($fileSize >= 1000000) {
-                $fileSize = round($fileSize / 1000000, 2);
+            } else if ($fileSize >= 1048576) {
+                $fileSize = round($fileSize / 1048576, 2);
                 $unit = 'MB';
-            } else if ($fileSize >= 1000) {
-                $fileSize = round($fileSize / 1000);
+            } else if ($fileSize >= 1024) {
+                $fileSize = round($fileSize / 1024);
                 $unit = 'KB';
             }
 

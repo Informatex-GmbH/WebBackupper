@@ -4,3 +4,4 @@ src/config/config.php
 log
 src/backup
 composer.lock
+config/config.php
