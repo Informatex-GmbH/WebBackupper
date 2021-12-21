@@ -36,7 +36,7 @@ class WebappBackupper {
             DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, $dbPort, $dbName, $dbUsername, $dbPassword);
 
             // backup folders
-            if ($webapp['subDirectories']) {
+            if (isset($webapp['subDirectories']) && $webapp['subDirectories']) {
                 $backupFolders = [];
                 foreach ($webapp['subDirectories'] as $subDirectory) {
                     $backupFolders[] = $webapp['directory'] . DIRECTORY_SEPARATOR . $subDirectory;

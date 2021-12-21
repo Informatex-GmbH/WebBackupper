@@ -167,11 +167,14 @@ class Backupper {
         // read message
         $msg = $e->getMessage();
 
+        // log entry
+        classes\Logger::error($msg, false);
+
         // get log folder
         $logDir = classes\Logger::$logFolder;
 
         // define exception file
-        $file = realpath(__DIR__) . DIRECTORY_SEPARATOR . $logDir . DIRECTORY_SEPARATOR . 'exceptions.txt';
+        $file = $logDir . DIRECTORY_SEPARATOR . 'WebBackupperExceptions.log';
 
         // write exception to logfile
         if (!is_file($file)) {
@@ -179,11 +182,20 @@ class Backupper {
         }
 
         if ($file && is_writable($file)) {
+            $errNo = (int)$e->getCode();
+            $errStr = $e->getMessage();
+            $errFile = $e->getFile();
+            $errLine = $e->getLine();
+
             $message = date('d.m.Y H:i:s') . ' ';
-            $message .= 'Msg: ' . $msg . "\n";
+
+            $message .= "User: $this->userId ";
+            $message .= "Code: $errNo ";
+            $message .= "File: $errFile ";
+            $message .= "Row: $errLine ";
+            $message .= $errStr . "\n";
 
             error_log($message, 3, $file);
         }
     }
-
 }

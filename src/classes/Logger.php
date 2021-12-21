@@ -29,12 +29,15 @@ class Logger {
      * adds an error message to the log
      *
      * @param string $message
+     * @param bool   $throwError
      * @throws \Exception
      */
-    public static function error(string $message): void {
+    public static function error(string $message, bool $throwError = true): void {
         self::addLogEntry($message, 'error');
 
-        throw new \Exception($message);
+        if ($throwError) {
+            throw new \Exception($message);
+        }
     }
 
 
