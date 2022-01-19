@@ -4,7 +4,7 @@
 use ifmx\WebBackupper;
 use ifmx\WebBackupper\classes;
 
-chdir(__DIR__);
+chdir(realpath(__DIR__ . '/..'));
 
 $config = [];
 
