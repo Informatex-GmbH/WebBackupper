@@ -189,7 +189,6 @@ class Backupper {
 
             $message = date('d.m.Y H:i:s') . ' ';
 
-            $message .= "User: $this->userId ";
             $message .= "Code: $errNo ";
             $message .= "File: $errFile ";
             $message .= "Row: $errLine ";
