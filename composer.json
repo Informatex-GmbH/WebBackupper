@@ -4,7 +4,7 @@
   "keywords": [
     "wordpress", "web", "backup", "backupper", "ftp", "sftp"
   ],
-  "homepage": "https://github.com/ifmx-dev/WebBackupper",
+  "homepage": "https://github.com/Informatex-GmbH/WebBackupper",
   "license": "MIT",
   "authors": [
     {
@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "ifmx-dev\\webbackupper\\": "src"
+      "ifmx\\webbackupper\\": "src"
     }
   }
 }
