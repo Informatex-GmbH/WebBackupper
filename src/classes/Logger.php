@@ -74,12 +74,13 @@ class Logger {
             foreach ($levels as &$level) {
                 $level = mb_strtolower($level);
             }
+            unset($level);
         }
 
         foreach (self::$logEntries as $entry) {
 
             // return entries only if in array and when is debug, check if debug mode is on
-            if (in_array($entry->level, $levels) || (!$levels && ($entry->level !== 'debug' || self::$debug))) {
+            if (in_array($entry->level, $levels, true) || (!$levels && ($entry->level !== 'debug' || self::$debug))) {
                 $entries[] = $entry;
             }
         }
@@ -101,12 +102,13 @@ class Logger {
             foreach ($levels as &$level) {
                 $level = mb_strtolower($level);
             }
+            unset($level);
         }
 
         foreach (self::$logEntries as $entry) {
 
             // write entries only if in array and when is debug, check if debug mode is on
-            if (in_array($entry->level, $levels) || (!$levels && ($entry->level !== 'debug' || self::$debug))) {
+            if (in_array($entry->level, $levels, true) || (!$levels && ($entry->level !== 'debug' || self::$debug))) {
                 $logString .= self::getEntryAsString($entry);
             }
         }
@@ -169,7 +171,7 @@ class Logger {
             $args = array_merge(['entry' => $entry], $functionArgs[0]);
 
             if (is_callable([$class, $function])) {
-                call_user_func([$class, $function], $args);
+                $class->$function($args);
             }
         }
     }

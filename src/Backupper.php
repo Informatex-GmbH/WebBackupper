@@ -47,7 +47,7 @@ class Backupper {
      * @return array|false
      * @throws \Exception
      */
-    public function createBackup(array $instances, array $ftpConfig = [], bool $cleanUpLocalFolder = true) {
+    public function createBackup(array $instances, array $ftpConfig = [], bool $cleanUpLocalFolder = true): false|array {
         try {
 
             $files = [];
@@ -162,7 +162,7 @@ class Backupper {
      * @param $e
      * @throws \Exception
      */
-    protected function handleException($e) {
+    protected function handleException($e): void {
 
         // read message
         $msg = $e->getMessage();

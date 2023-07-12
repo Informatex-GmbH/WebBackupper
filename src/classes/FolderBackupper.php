@@ -120,7 +120,7 @@ class FolderBackupper {
      * @param string $toFolder
      * @throws \Exception
      */
-    protected static function copyFolder(string $fromFolder, string $toFolder) {
+    protected static function copyFolder(string $fromFolder, string $toFolder): void {
 
         // check if folder exists
         if (!is_dir($fromFolder)) {
@@ -128,10 +128,8 @@ class FolderBackupper {
         }
 
         // create folder if not exists
-        if (!is_dir($toFolder)) {
-            if (!mkdir($toFolder, 0777, true)) {
-                Logger::error('Folder "' . $toFolder . '" could not be created');
-            }
+        if (!is_dir($toFolder) && !mkdir($toFolder, 0777, true) && !is_dir($toFolder)) {
+            Logger::error('Folder "' . $toFolder . '" could not be created');
         }
 
         // open from folder
@@ -139,7 +137,7 @@ class FolderBackupper {
 
         // loop trough files in source folder
         while (false !== ($file = readdir($dir))) {
-            if ($file != '.' && $file != '..') {
+            if ($file !== '.' && $file !== '..') {
                 $fromFile = $fromFolder . DIRECTORY_SEPARATOR . $file;
                 $toFile = $toFolder . DIRECTORY_SEPARATOR . $file;
 
@@ -190,10 +188,8 @@ class FolderBackupper {
             }
 
             // delete file
-        } else {
-            if (!unlink($path)) {
-                $return = false;
-            }
+        } else if (!unlink($path)) {
+            $return = false;
         }
 
         return $return;

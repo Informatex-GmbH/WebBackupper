@@ -42,6 +42,7 @@ class WordpressBackupper {
                 foreach ($backupFolders as &$backupFolder) {
                     $backupFolder = $directory . DIRECTORY_SEPARATOR . $backupFolder;
                 }
+                unset($backupFolder);
 
                 // define path for wp-config.php
                 $wpConfigFile = $directory . DIRECTORY_SEPARATOR . 'wp-config.php';
@@ -108,7 +109,7 @@ class WordpressBackupper {
     // Protected
     protected static function getFromWpConfig(string $wpConfig, string $defineString): ?string {
         $matches = [];
-        $regex = "/define\(\s*'$defineString',\s*'(.*)'\s*\);/";
+        $regex = "/define\(\s*['|\"]" . $defineString . "['|\"],\s*['|\"](.*)['|\"]\s*\);/";
         preg_match($regex, $wpConfig, $matches);
 
         if ($matches) {

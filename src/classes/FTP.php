@@ -123,16 +123,16 @@ class FTP {
                     // close connection
                     return ftp_close($connection);
 
-                } else {
-                    Logger::error('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
                 }
+
+                Logger::error('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
             } else {
                 Logger::error('unable to connect to ftp server: ' . $ftpHost . ':' . $ftpPort);
             }
 
             return false;
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             Logger::error($e->getMessage());
 
             return false;
@@ -201,8 +201,8 @@ class FTP {
                     }
 
                     // upload file
-                    $remFile = fopen("ssh2.sftp://$sftp/" . $destFile, 'w');
-                    $srcFile = fopen($sourceFile, 'r');
+                    $remFile = fopen("ssh2.sftp://$sftp/" . $destFile, 'wb');
+                    $srcFile = fopen($sourceFile, 'rb');
 
                     if ($srcFile) {
                         if ($remFile) {
@@ -224,25 +224,25 @@ class FTP {
 
                             return true;
 
-                        } else {
-                            Logger::error('unable to create file on sftp server: ' . $destFile);
                         }
+
+                        Logger::error('unable to create file on sftp server: ' . $destFile);
                     } else {
                         Logger::error('unable to open local file: ' . $sourceFile);
                     }
 
                     return false;
 
-                } else {
-                    Logger::error('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
                 }
+
+                Logger::error('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
             } else {
                 Logger::error('unable to connect to sftp server: ' . $ftpHost . ':' . $ftpPort);
             }
 
             return false;
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             Logger::error($e->getMessage());
 
             return false;

@@ -6,6 +6,7 @@
   ],
   "homepage": "https://github.com/Informatex-GmbH/WebBackupper",
   "license": "MIT",
+  "version": "1.1.0",
   "authors": [
     {
       "name": "Informatex",
@@ -13,11 +14,15 @@
     }
   ],
   "require": {
-    "php": ">=7.4"
+    "php": ">=8.2",
+    "ext-zip": "*",
+    "ext-ftp": "*",
+    "ext-ssh2": "*",
+    "ext-mbstring": "*"
   },
   "autoload": {
     "psr-4": {
-      "ifmx\\webbackupper\\": "src"
+      "ifmx\\WebBackupper\\": "src"
     }
   }
 }

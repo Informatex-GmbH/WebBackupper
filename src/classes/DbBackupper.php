@@ -84,7 +84,7 @@ class DbBackupper {
         } else {
             preg_match('/(:\d+)/', $dbHost, $matches);
             if ($matches && $matches[1]) {
-                $dbPort = substr($matches[1], 1,);
+                $dbPort = (int)substr($matches[1], 1);
                 $dbHost = str_replace($matches[1], '', $dbHost);
             }
 

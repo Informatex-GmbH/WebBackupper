@@ -16,8 +16,8 @@ class General {
     public static function getConfig(string $elements = null) {
         $config = self::$config;
 
-        $elements = explode(',', $elements);
-        foreach ($elements as $val) {
+        $values = explode(',', $elements);
+        foreach ($values as $val) {
             if ($config && array_key_exists(trim($val), $config)) {
                 if ($config[trim($val)] === false) {
                     $config = false;
@@ -45,7 +45,7 @@ class General {
 
         // create backup folder if not exists
         if (!is_dir($backupDir)) {
-            if (!mkdir($backupDir, 0777, true)) {
+            if (!mkdir($backupDir, 0777, true) && !is_dir($backupDir)) {
                 throw new \Exception('Folder could not be created: ' . $backupDir);
             }
         }
@@ -98,7 +98,7 @@ class General {
 
         // create temp folder if not exists
         if (!is_dir($logDir)) {
-            if (!mkdir($logDir, 0777, true)) {
+            if (!mkdir($logDir, 0777, true) && !is_dir($logDir)) {
                 throw new \Exception('Folder could not be created: ' . $logDir);
             }
         }
@@ -120,7 +120,7 @@ class General {
 
         // create temp folder if not exists
         if (!is_dir($tempDir)) {
-            if (!mkdir($tempDir, 0777, true)) {
+            if (!mkdir($tempDir, 0777, true) && !is_dir($tempDir)) {
                 throw new \Exception('Folder could not be created: ' . $tempDir);
             }
         }
