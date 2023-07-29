@@ -8,11 +8,11 @@ require_once 'classes/FTP.php';
 require_once 'classes/Logger.php';
 require_once 'classes/General.php';
 require_once 'classes/Cleanup.php';
-require_once 'classes/DbBackupper.php';
-require_once 'classes/FtpBackupper.php';
-require_once 'classes/FolderBackupper.php';
-require_once 'classes/WebappBackupper.php';
-require_once 'classes/WordpressBackupper.php';
+require_once 'classes/backupper/Db.php';
+require_once 'classes/backupper/Ftp.php';
+require_once 'classes/backupper/Folder.php';
+require_once 'classes/backupper/Webapp.php';
+require_once 'classes/backupper/Wordpress.php';
 
 class Backupper {
 
@@ -55,27 +55,27 @@ class Backupper {
 
             // backup wordpress instances
             if (array_key_exists('wordpress', $instances) && is_array($instances['wordpress'])) {
-                $files['wordpress'] = classes\WordpressBackupper::createBackup($instances['wordpress'], $ftpConfig);
+                $files['wordpress'] = classes\backupper\Wordpress::createBackup($instances['wordpress'], $ftpConfig);
             }
 
             // backup folders and database to one file
             if (array_key_exists('webapps', $instances) && is_array($instances['webapps'])) {
-                $files['webapps'] = classes\WebappBackupper::createBackup($instances['webapps'], $ftpConfig);
+                $files['webapps'] = classes\backupper\Webapp::createBackup($instances['webapps'], $ftpConfig);
             }
 
             // backup databases
             if (array_key_exists('databases', $instances) && is_array($instances['databases'])) {
-                $files['databases'] = classes\DbBackupper::createBackup($instances['databases'], $ftpConfig);
+                $files['databases'] = classes\backupper\Db::createBackup($instances['databases'], $ftpConfig);
             }
 
             // backup directories
             if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
-                $files['directories'] = classes\FolderBackupper::createBackup($instances['directories'], $ftpConfig);
+                $files['directories'] = classes\backupper\Folder::createBackup($instances['directories'], $ftpConfig);
             }
 
             // backup ftp
             if (array_key_exists('ftps', $instances) && is_array($instances['ftps'])) {
-                $files['ftps'] = classes\FtpBackupper::createBackup($instances['ftps'], $ftpConfig);
+                $files['ftps'] = classes\backupper\Ftp::createBackup($instances['ftps'], $ftpConfig);
             }
 
             // cleanup local folder

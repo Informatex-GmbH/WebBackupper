@@ -1,8 +1,10 @@
 <?php
 
-namespace ifmx\WebBackupper\classes;
+namespace ifmx\WebBackupper\classes\backupper;
 
-class WebappBackupper {
+use ifmx\WebBackupper\classes;
+
+class Webapp {
 
     // -------------------------------------------------------------------
     // Public Functions
@@ -23,8 +25,8 @@ class WebappBackupper {
         foreach ($instances as $instanceName => $webapp) {
 
             // define backup and temp folder name for instance
-            $backupDir = General::getBackupDir($instanceName);
-            $tempDir = General::getTempDir($instanceName);
+            $backupDir = classes\General::getBackupDir($instanceName);
+            $tempDir = classes\General::getTempDir($instanceName);
 
             $dbHost = $webapp['db']['host'];
             $dbPort = $webapp['db']['port'];
@@ -33,7 +35,7 @@ class WebappBackupper {
             $dbPassword = $webapp['db']['password'];
 
             // create database dump
-            DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, $dbPort, $dbName, $dbUsername, $dbPassword);
+            Db::createDbBackup($instanceName, $tempDir, $dbHost, $dbPort, $dbName, $dbUsername, $dbPassword);
 
             // backup folders
             if (isset($webapp['subDirectories']) && $webapp['subDirectories']) {
@@ -46,29 +48,29 @@ class WebappBackupper {
             }
 
             // create folder backup
-            $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $backupFolders);
+            $fileName = Folder::createFileBackup($instanceName, $tempDir, $backupDir, $backupFolders);
 
             // on success
             if ($fileName) {
                 $files[$instanceName] = $fileName;
 
                 // set log msg
-                Logger::info('webapp "' . $instanceName . '" backuped successfully');
+                classes\Logger::info('webapp "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 if ($ftpConfig) {
-                    $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
+                    $uploaded = classes\FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
 
                     if ($uploaded) {
-                        Logger::info('webapp backup "' . $instanceName . '" uploaded to FTP successfully');
+                        classes\Logger::info('webapp backup "' . $instanceName . '" uploaded to FTP successfully');
                     } else {
-                        Logger::warning('webapp backup "' . $instanceName . '" uploaded to FTP failed');
+                        classes\Logger::warning('webapp backup "' . $instanceName . '" uploaded to FTP failed');
                     }
                 }
             } else {
 
                 // set log msg
-                Logger::error('webapp "' . $instanceName . '" backup failed');
+                classes\Logger::error('webapp "' . $instanceName . '" backup failed');
             }
         }
 

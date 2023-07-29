@@ -1,8 +1,10 @@
 <?php
 
-namespace ifmx\WebBackupper\classes;
+namespace ifmx\WebBackupper\classes\backupper;
 
-class DbBackupper {
+use ifmx\WebBackupper\classes;
+
+class Db {
 
     // -------------------------------------------------------------------
     // Public Functions
@@ -21,10 +23,10 @@ class DbBackupper {
 
         // loop databases in config
         foreach ($instances as $instanceName => $db) {
-            Logger::debug('start backup database: ' . $instanceName);
+            classes\Logger::debug('start backup database: ' . $instanceName);
 
             // define backup folder name for instance
-            $backupDir = General::getBackupDir($instanceName);
+            $backupDir = classes\General::getBackupDir($instanceName);
 
             // create database dump
             $fileName = self::createDbBackup($instanceName, $backupDir, $db['host'], $db['port'], $db['name'], $db['username'], $db['password']);
@@ -34,22 +36,22 @@ class DbBackupper {
                 $files[$instanceName] = $fileName;
 
                 // set log msg
-                Logger::info('Database "' . $instanceName . '" backuped successfully');
+                classes\Logger::info('Database "' . $instanceName . '" backuped successfully');
 
                 // upload file to ftp server
                 if ($ftpConfig) {
-                    $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
+                    $uploaded = classes\FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
 
                     if ($uploaded) {
-                        Logger::info('Database Backup "' . $instanceName . '" uploaded to FTP successfully');
+                        classes\Logger::info('Database Backup "' . $instanceName . '" uploaded to FTP successfully');
                     } else {
-                        Logger::warning('Database Backup "' . $instanceName . '" uploaded to FTP failed');
+                        classes\Logger::warning('Database Backup "' . $instanceName . '" uploaded to FTP failed');
                     }
                 }
             } else {
 
                 // set log msg
-                Logger::error('Database "' . $instanceName . '" backup failed');
+                classes\Logger::error('Database "' . $instanceName . '" backup failed');
             }
         }
 
@@ -97,13 +99,13 @@ class DbBackupper {
         // define content for access file
         $fileContent = "[client]\nhost=$dbHost\nport=$dbPort\nuser=$dbUser\npassword=$dbPassword";
 
-        Logger::debug('try to create db-access file for instance "' . $instanceName . '"');
+        classes\Logger::debug('try to create db-access file for instance "' . $instanceName . '"');
 
         // write temp access file
         if (file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf', $fileContent)) {
-            Logger::debug('successfully created db-access file for instance "' . $instanceName . '"');
+            classes\Logger::debug('successfully created db-access file for instance "' . $instanceName . '"');
         } else {
-            Logger::error('db-access file for instance "' . $instanceName . '" could not be created');
+            classes\Logger::error('db-access file for instance "' . $instanceName . '" could not be created');
         }
 
         // set variables for dump
@@ -115,34 +117,34 @@ class DbBackupper {
 //        }
 
         // command for create databse dump
-        $command = General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath . '"';
+        $command = classes\General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath . '"';
 
         // execute command
         $response = [];
         $status = false;
         exec($command, $response, $status);
 
-        Logger::debug('try to delete db-access file for instance "' . $instanceName . '"');
+        classes\Logger::debug('try to delete db-access file for instance "' . $instanceName . '"');
 
         // remove temp access file
         if (unlink($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf')) {
-            Logger::debug('successfully deleted db-access file for instance "' . $instanceName . '"');
+            classes\Logger::debug('successfully deleted db-access file for instance "' . $instanceName . '"');
         } else {
-            Logger::warning('could not delete db-access file for instance "' . $instanceName . '"');
+            classes\Logger::warning('could not delete db-access file for instance "' . $instanceName . '"');
         }
 
         // log error when failed
         if ($status) {
-            Logger::error('create DB-dump from instance "' . $instanceName . '" failed');
+            classes\Logger::error('create DB-dump from instance "' . $instanceName . '" failed');
 
             return '';
         }
 
         // get file size
-        $fileSize = General::getFileSize($sqlPath);
+        $fileSize = classes\General::getFileSize($sqlPath);
 
         // debug log
-        Logger::debug('created DB-dump from instance "' . $instanceName . '". file size: ' . $fileSize);
+        classes\Logger::debug('created DB-dump from instance "' . $instanceName . '". file size: ' . $fileSize);
 
         // return filename
         return $sqlName;

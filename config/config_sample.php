@@ -120,9 +120,9 @@ return [
     ],
 
     // ------------------------------------------
-    // FTP
+    // FTP for Backupfiles
     // -----------------------------------------
-    'ftp' => [
+    'backupFtp' => [
         'enabled' => false,
         'connections' => [
             'NAS' => [

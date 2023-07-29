@@ -1,8 +1,10 @@
 <?php
 
-namespace ifmx\WebBackupper\classes;
+namespace ifmx\WebBackupper\classes\backupper;
 
-class WordpressBackupper {
+use ifmx\WebBackupper\classes;
+
+class Wordpress {
 
     // -------------------------------------------------------------------
     // Public Functions
@@ -51,8 +53,8 @@ class WordpressBackupper {
                 if (file_exists($wpConfigFile)) {
 
                     // define backup and temp folder name for instance
-                    $backupDir = General::getBackupDir($instanceName);
-                    $tempDir = General::getTempDir($instanceName);
+                    $backupDir = classes\General::getBackupDir($instanceName);
+                    $tempDir = classes\General::getTempDir($instanceName);
 
                     // backup wp-config.php
                     copy($wpConfigFile, $tempDir . DIRECTORY_SEPARATOR . 'wp-config.php');
@@ -65,40 +67,40 @@ class WordpressBackupper {
                     $dbPassword = self::getFromWpConfig($wpConfig, 'DB_PASSWORD');
 
                     // create database dump
-                    DbBackupper::createDbBackup($instanceName, $tempDir, $dbHost, null, $dbName, $dbUser, $dbPassword);
+                    Db::createDbBackup($instanceName, $tempDir, $dbHost, null, $dbName, $dbUser, $dbPassword);
 
                     // create folder backup
-                    $fileName = FolderBackupper::createFileBackup($instanceName, $tempDir, $backupDir, $backupFolders);
+                    $fileName = Folder::createFileBackup($instanceName, $tempDir, $backupDir, $backupFolders);
 
                     // on success
                     if ($fileName) {
                         $files[$instanceName] = $fileName;
 
                         // set log msg
-                        Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
+                        classes\Logger::info('wordpress instance "' . $instanceName . '" backuped successfully');
 
                         // upload file to ftp server
                         if ($ftpConfig) {
-                            $uploaded = FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
+                            $uploaded = classes\FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
 
                             if ($uploaded) {
-                                Logger::info('wordpress backup "' . $instanceName . '" successfully uploaded to FTP');
+                                classes\Logger::info('wordpress backup "' . $instanceName . '" successfully uploaded to FTP');
                             } else {
-                                Logger::warning('wordpress backup "' . $instanceName . '" upload to FTP failed');
+                                classes\Logger::warning('wordpress backup "' . $instanceName . '" upload to FTP failed');
                             }
                         }
                     } else {
 
                         // set log msg
-                        Logger::error('wordpress instance "' . $instanceName . '" backup failed');
+                        classes\Logger::error('wordpress instance "' . $instanceName . '" backup failed');
                     }
 
                 } else {
-                    Logger::error('wordpress config file does not exist in folder: ' . $wpDirectory);
+                    classes\Logger::error('wordpress config file does not exist in folder: ' . $wpDirectory);
                 }
 
             } else {
-                Logger::error('folder "' . $wpDirectory . '" does not exist');
+                classes\Logger::error('folder "' . $wpDirectory . '" does not exist');
             }
         }
 

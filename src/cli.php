@@ -23,8 +23,8 @@ try {
     $instances['ftps'] = classes\General::getConfig('ftps');
 
     $ftpConfig = [];
-    if (classes\General::getConfig('ftp, enabled')) {
-        $ftpConfig = classes\General::getConfig('ftp, connections');
+    if (classes\General::getConfig('backupFtp, enabled')) {
+        $ftpConfig = classes\General::getConfig('backupFtp, connections');
     }
 
 // create backups

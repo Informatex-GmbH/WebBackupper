@@ -117,7 +117,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
 9. FTP-Upload Settings
    1. Only one FTP configuration
        ```
-       'ftp' => [
+       'backupFtp' => [
            'enabled' => false,
            'connections' => [
                'isSftp' => true,
@@ -131,7 +131,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
       ```
    2. Multiple FTP configurations
        ```
-       'ftp' => [
+       'backupFtp' => [
            'enabled' => false,
            'connections' => [
                'NAS' => [
