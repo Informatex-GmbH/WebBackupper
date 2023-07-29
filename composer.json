@@ -1,6 +1,6 @@
 {
   "name": "ifmx/webbackupper",
-  "description": "A simple PHP WebBackupper for Wordpress Instances, databases and folders to a FTP/SFTP Server",
+  "description": "A simple PHP WebBackupper for Wordpress Instances, databases, folders and FTP/SFTP-Folders local and to a FTP/SFTP Server",
   "keywords": [
     "wordpress", "web", "backup", "backupper", "ftp", "sftp"
   ],

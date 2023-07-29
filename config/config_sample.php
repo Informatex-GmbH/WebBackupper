@@ -1,9 +1,9 @@
 <?php
 
 // Debug mode
-$debug_mode = true;
+$debug_mode = false;
 
-$config = [
+return [
 
     // ------------------------------------------
     // Wordpress Instances for backup
@@ -26,7 +26,7 @@ $config = [
 
     // ------------------------------------------
     // Folder and DB Backup for backup
-    // 'Name for Backupfile' => 'Infos'
+    // 'Name for Backupfile' => [Settings]
     // ------------------------------------------
     'webapps' => [
         // Webapp 1
@@ -48,7 +48,7 @@ $config = [
 
     // ------------------------------------------
     // Database for backup
-    // 'Name for Backupfile' => [Login Infos]
+    // 'Name for Backupfile' => [DB-Connection Settings]
     // ------------------------------------------
     'databases' => [
         // DB 1
@@ -72,6 +72,23 @@ $config = [
         'TestMultipleFolders' => [
             '/home/var/www/folder1',
             '/home/var/www/folder2'
+        ]
+    ],
+
+
+    // ------------------------------------------
+    // FTP-Connection for backup
+    // 'Name for Backupfile' => [FTP-Connection Settings]
+    // ------------------------------------------
+    'ftps' => [
+        // FTP-Config 1
+        'TestFtp' => [
+            'isSftp' => false,
+            'host' => 'sftp.mydomain.com',
+            'port' => '21', // optional
+            'username' => 'backup',
+            'password' => '***',
+            'path' => 'my/folder/'
         ]
     ],
 

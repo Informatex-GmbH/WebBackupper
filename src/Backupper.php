@@ -9,6 +9,7 @@ require_once 'classes/Logger.php';
 require_once 'classes/General.php';
 require_once 'classes/Cleanup.php';
 require_once 'classes/DbBackupper.php';
+require_once 'classes/FtpBackupper.php';
 require_once 'classes/FolderBackupper.php';
 require_once 'classes/WebappBackupper.php';
 require_once 'classes/WordpressBackupper.php';
@@ -70,6 +71,11 @@ class Backupper {
             // backup directories
             if (array_key_exists('directories', $instances) && is_array($instances['directories'])) {
                 $files['directories'] = classes\FolderBackupper::createBackup($instances['directories'], $ftpConfig);
+            }
+
+            // backup ftp
+            if (array_key_exists('ftps', $instances) && is_array($instances['ftps'])) {
+                $files['ftps'] = classes\FtpBackupper::createBackup($instances['ftps'], $ftpConfig);
             }
 
             // cleanup local folder

@@ -2,14 +2,14 @@
 [![Requires PHP 7.4.0](https://img.shields.io/badge/PHP-7.4.0-green.svg)](https://php.net)
 
 # WebBackupper
-*A simple PHP WebBackupper for Wordpress Instances, databases and folders to a FTP/SFTP Server*
+*A simple PHP WebBackupper for Wordpress Instances, databases, folders and FTP/SFTP-Folders local and to a FTP/SFTP Server*
 
 Goal of this project is to provide a small Web Backupper for backup webpages, or projects to a FTP/SFTP Server 
 
 ## Manual
 ### 1. Copy files to webserver
-### 2. Copy config_sample.php and name it config.php
-### 3. Edit config.php file 
+### 2. Copy ```config_sample.php``` and rename it to ```config.php```
+### 3. Edit ```config.php``` file 
 1. Wordpress Instances (if not needed let array empty - ```'wordpress' => []```)
     ```
     // WP-Directory 1 with default wp-content folder
@@ -75,7 +75,22 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
         ]
     ]
    ```
-5. System
+5. FTP-Files (if not needed let array empty - ```'ftps' => []```)
+    ```
+    'ftps' => [
+   
+        // FTP-Config 1
+        'TestFtp' => [
+            'isSftp' => false,
+            'host' => 'sftp.mydomain.com',
+            'port' => '21',
+            'username' => 'backup',
+            'password' => '***',
+            'path' => 'my/folder/'
+        ]
+    ]
+   ```
+6. System
     ```
     'system' => [
         'debug' => $debug_mode,        // is debug mode on
@@ -86,20 +101,20 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
         'webmasterEmailAddress' => 'webmaster@mydomain.com'
     ]
    ```
-6. Systemdirectorys
+7. Systemdirectorys
     ```
     'sysDirectories' => [
         'backup' => 'backup', // path to backup folder
         'log' => 'log'        // path to log folder
     ],
    ```
-7. Paths
+8. Paths
     ```
     'paths' => [
         'mysqldump' => '/usr/local/bin' // Path to mysqldump
    ]
    ```
-8. FTP information
+9. FTP-Upload Settings
    1. Only one FTP configuration
        ```
        'ftp' => [
@@ -114,7 +129,7 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
            ]
        ]
       ```
-   1. Multiple FTP configurations
+   2. Multiple FTP configurations
        ```
        'ftp' => [
            'enabled' => false,
@@ -132,4 +147,4 @@ Goal of this project is to provide a small Web Backupper for backup webpages, or
       ```
 
 ### 4. Create cli task
-Create a cli task that runs cli.php with PHP7.4. Everytime the task is running, the backup job will be done.
+Create a cli task that runs cli.php with PHP8.2. Everytime the task is running, the backup job will be done.

@@ -80,7 +80,7 @@ class Logger {
         foreach (self::$logEntries as $entry) {
 
             // return entries only if in array and when is debug, check if debug mode is on
-            if (in_array($entry->level, $levels, true) || (!$levels && ($entry->level !== 'debug' || self::$debug))) {
+            if ((!$levels && ($entry->level !== 'debug' || self::$debug)) || in_array($entry->level, $levels, true)) {
                 $entries[] = $entry;
             }
         }
@@ -108,7 +108,7 @@ class Logger {
         foreach (self::$logEntries as $entry) {
 
             // write entries only if in array and when is debug, check if debug mode is on
-            if (in_array($entry->level, $levels, true) || (!$levels && ($entry->level !== 'debug' || self::$debug))) {
+            if ((!$levels && ($entry->level !== 'debug' || self::$debug)) || in_array($entry->level, $levels, true)) {
                 $logString .= self::getEntryAsString($entry);
             }
         }
