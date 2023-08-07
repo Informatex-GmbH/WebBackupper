@@ -131,7 +131,8 @@ return [
                 'port' => '22',
                 'username' => 'backup',
                 'password' => '***',
-                'path' => 'backup/web/'
+                'path' => 'backup/web/',
+                'remoteBackupCopies' => null // NULL = infinite
             ]
         ]
     ]

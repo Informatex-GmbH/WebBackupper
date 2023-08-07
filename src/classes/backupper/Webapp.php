@@ -68,9 +68,7 @@ class Webapp {
                     }
                 }
             } else {
-
-                // set log msg
-                classes\Logger::error('webapp "' . $instanceName . '" backup failed');
+                throw new \Exception('webapp "' . $instanceName . '" backup failed');
             }
         }
 

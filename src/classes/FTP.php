@@ -9,12 +9,41 @@ class FTP {
     // -------------------------------------------------------------------
 
     /**
+     * delete files from ftp server
+     *
+     * @param string   $instanceName
+     * @param array    $ftpConfig
+     * @param int|null $limit
+     * @return bool
+     * @throws \Exception|\Throwable
+     */
+    public static function delete(string $instanceName, array $ftpConfig, ?int $limit = null): bool {
+
+        $isSftp = $ftpConfig['isSftp'];
+        $ftpHost = $ftpConfig['host'];
+        $ftpUsername = $ftpConfig['username'];
+        $ftpPassword = $ftpConfig['password'];
+        $ftpPath = $ftpConfig['path'];
+        $ftpPort = $ftpConfig['port'];
+
+        // delete from to sftp server
+        if ($isSftp) {
+            return self::deleteFromSftp($instanceName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort, $limit);
+        }
+
+        // delete from ftp server
+        return self::deleteFromFtp($instanceName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort, $limit);
+    }
+
+
+    /**
      * downloads files from ftp server
      *
      * @param string $tempDir
      * @param array  $ftpConfig
      * @return bool
      * @throws \Exception
+     * @throws \Throwable
      */
     public static function download(string $tempDir, array $ftpConfig): bool {
 
@@ -43,7 +72,7 @@ class FTP {
      * @param string $fileName
      * @param array  $ftpConfigs
      * @return bool
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     public static function upload(string $instanceName, string $backupDir, string $fileName, array $ftpConfigs): bool {
 
@@ -64,7 +93,7 @@ class FTP {
             if ($isSftp) {
                 self::sendToSftp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
 
-            // send to ftp server
+                // send to ftp server
             } else {
                 self::sendToFtp($instanceName, $backupDir, $fileName, $ftpHost, $ftpUsername, $ftpPassword, $ftpPath, $ftpPort);
             }
@@ -76,6 +105,177 @@ class FTP {
     // -------------------------------------------------------------------
     // Protected Functions
     // -------------------------------------------------------------------
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    protected static function deleteFromFtp(string $instanceName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null, int $limit = 10): bool {
+        try {
+            Logger::debug('start delete from ftp server');
+
+            // define default port
+            if (!$ftpPort) {
+                $ftpPort = 21;
+            }
+
+            // set paths
+            $sourcePath = "$ftpPath/$instanceName";
+
+            Logger::debug('try connect to ftp server');
+
+            // connect to server
+            $connection = ftp_ssl_connect($ftpHost, $ftpPort);
+
+            // check connection
+            if ($connection) {
+                Logger::debug('successfully connected to ftp server');
+                Logger::debug('try to authenticate on ftp server');
+
+                // login to server
+                if (ftp_login($connection, $ftpUsername, $ftpPassword)) {
+                    Logger::debug('successfully authenticated on ftp server');
+
+                    // check if folder exist
+                    $folderExists = is_dir("ftp://$ftpUsername:$ftpPassword@$ftpHost/" . $sourcePath);
+                    if ($folderExists) {
+
+                        // change dir on ftp server
+                        if (ftp_chdir($connection, $sourcePath)) {
+
+                            // get list of files form ftp server
+                            $fileList = ftp_nlist($connection, '.');
+                            if ($fileList) {
+
+                                // sort files by dates
+                                usort($fileList, static function ($a, $b) use ($connection) {
+                                    return ftp_mdtm($connection, $b) - ftp_mdtm($connection, $a);
+                                });
+
+                                // delete files
+                                $filesToDelete = array_slice($fileList, $limit);
+                                foreach ($filesToDelete as $file) {
+                                    Logger::debug('try to delete "' . $file . '" from ftp server');
+                                    $success = ftp_delete($connection, $file);
+
+                                    if ($success) {
+                                        Logger::debug('successfully deleted "' . $file . '" from ftp server');
+                                    } else {
+                                        throw new \Exception('could not delete "' . $file . '" from ftp server');
+                                    }
+                                }
+                            } else {
+                                throw new \Exception('could not get list of files from folder "' . $sourcePath . '" on ftp server');
+                            }
+
+                        } else {
+                            throw new \Exception('could not change to folder "' . $sourcePath . '" on ftp server');
+                        }
+
+                    } else {
+                        throw new \Exception('folder "' . $sourcePath . '" does not exist on ftp server');
+                    }
+
+                    // close connection
+                    return ftp_close($connection);
+                }
+
+                throw new \Exception('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
+            }
+
+            throw new \Exception('unable to connect to ftp server: ' . $ftpHost . ':' . $ftpPort);
+
+        } catch (\Throwable $e) {
+
+            // close connection
+            if (isset($connection)) {
+                ftp_close($connection);
+            }
+
+            throw $e;
+        }
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    protected static function deleteFromSftp(string $instanceName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null, int $limit = 10): bool {
+
+        Logger::debug('start download from sftp server');
+
+        // define default port
+        if (!$ftpPort) {
+            $ftpPort = 22;
+        }
+
+        // set paths
+        $sourcePath = "$ftpPath/$instanceName";
+
+        Logger::debug('try connect to sftp server');
+
+        // connect to server
+        $connection = ssh2_connect($ftpHost, $ftpPort);
+
+        // check connection
+        if ($connection) {
+            Logger::debug('successfully connected to sftp server');
+            Logger::debug('try to authenticate on sftp server');
+
+            // login to server
+            if (ssh2_auth_password($connection, $ftpUsername, $ftpPassword)) {
+                Logger::debug('successfully authenticated on sftp server');
+
+                // initialize SFTP subsystem
+                $sftp = ssh2_sftp($connection);
+
+                // check if folder exist
+                $folderExists = is_dir("ssh2.sftp://$sftp/$sourcePath");
+                if ($folderExists) {
+
+                    // get list of files form ftp server
+                    $fileList = scandir("ssh2.sftp://$sftp/$sourcePath");
+                    if ($fileList) {
+
+                        // cleanup array
+                        unset($fileList[0], $fileList[1]); // delete '.' and '..' from array
+
+                        // sort files by dates
+                        usort($fileList, static function ($a, $b) use ($sftp, $sourcePath) {
+                            $aTimestamp = filemtime("ssh2.sftp://$sftp/$sourcePath/$a");
+                            $bTimestamp = filemtime("ssh2.sftp://$sftp/$sourcePath/$b");
+
+                            return $bTimestamp - $aTimestamp;
+                        });
+
+                        // delete files
+                        $filesToDelete = array_slice($fileList, $limit);
+                        foreach ($filesToDelete as $file) {
+                            Logger::debug('try to delete "' . $file . '" from sftp server');
+                            $success = ssh2_sftp_unlink($sftp, "$sourcePath/$file");
+
+                            if ($success) {
+                                Logger::debug('successfully deleted "' . $file . '" from sftp server');
+                            } else {
+                                throw new \Exception('could not delete "' . $file . '" from sftp server');
+                            }
+                        }
+
+                        return true;
+                    }
+                } else {
+                    throw new \Exception('folder "' . $sourcePath . '" does not exist on sftp server');
+                }
+            } else {
+                throw new \Exception('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
+            }
+        } else {
+            throw new \Exception('unable to connect to sftp server: ' . $ftpHost . ':' . $ftpPort);
+        }
+
+        return false;
+    }
+
 
     /**
      * @throws \Exception
@@ -130,17 +330,17 @@ class FTP {
 
                 if (is_file("ssh2.sftp://$sftp/$remoteFilePath")) {
 
-                    $stream = fopen("ssh2.sftp://$sftp/$remoteFilePath", 'rb');
+                    $remoteStream = fopen("ssh2.sftp://$sftp/$remoteFilePath", 'rb');
                     $localStream = fopen("$destPath/$file", 'wb');
 
-                    if (!$stream || !$localStream) {
+                    if (!$remoteStream || !$localStream) {
                         throw new \Exception('file stream for file "' . "$subFolder/$file" . '"could not be opened');
                     }
 
                     // copy file
-                    stream_copy_to_stream($stream, $localStream);
+                    stream_copy_to_stream($remoteStream, $localStream);
 
-                    fclose($stream);
+                    fclose($remoteStream);
                     fclose($localStream);
                 }
             }
@@ -160,7 +360,7 @@ class FTP {
      * @param string   $ftpPath
      * @param int|null $ftpPort
      * @return bool
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     protected static function getFromFtp(string $tempDir, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
         try {
@@ -200,29 +400,29 @@ class FTP {
                         if ($success) {
                             Logger::info('successfully downloaded files from ftp server');
                         } else {
-                            Logger::error('could not download files from ftp server');
-
-                            return false;
+                            throw new \Exception('could not download files from ftp server');
                         }
                     } else {
-                        Logger::error('folder "' . $sourcePath . '" does not exist on ftp server');
+                        throw new \Exception('folder "' . $sourcePath . '" does not exist on ftp server');
                     }
 
                     // close connection
                     return ftp_close($connection);
                 }
 
-                Logger::error('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
-            } else {
-                Logger::error('unable to connect to ftp server: ' . $ftpHost . ':' . $ftpPort);
+                throw new \Exception('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
             }
 
-            return false;
+            throw new \Exception('unable to connect to ftp server: ' . $ftpHost . ':' . $ftpPort);
 
         } catch (\Throwable $e) {
-            Logger::error($e->getMessage());
 
-            return false;
+            // close connection
+            if (isset($connection)) {
+                ftp_close($connection);
+            }
+
+            throw $e;
         }
     }
 
@@ -240,68 +440,57 @@ class FTP {
      * @throws \Exception
      */
     protected static function getFromSftp(string $tempDir, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
-        try {
 
-            Logger::debug('start download from ftp server');
+        Logger::debug('start download from sftp server');
 
-            // define default port
-            if (!$ftpPort) {
-                $ftpPort = 21;
-            }
+        // define default port
+        if (!$ftpPort) {
+            $ftpPort = 22;
+        }
 
-            // set paths
-            $sourcePath = $ftpPath;
-            $destPath = $tempDir;
+        // set paths
+        $sourcePath = $ftpPath;
+        $destPath = $tempDir;
 
-            Logger::debug('try connect to ftp server');
+        Logger::debug('try connect to sftp server');
 
-            // connect to server
-            $connection = ssh2_connect($ftpHost, $ftpPort);
+        // connect to server
+        $connection = ssh2_connect($ftpHost, $ftpPort);
 
-            // check connection
-            if ($connection) {
-                Logger::debug('successfully connected to ftp server');
-                Logger::debug('try to authenticate on ftp server');
+        // check connection
+        if ($connection) {
+            Logger::debug('successfully connected to sftp server');
+            Logger::debug('try to authenticate on sftp server');
 
-                // login to server
-                if (ssh2_auth_password($connection, $ftpUsername, $ftpPassword)) {
-                    Logger::debug('successfully authenticated on ftp server');
+            // login to server
+            if (ssh2_auth_password($connection, $ftpUsername, $ftpPassword)) {
+                Logger::debug('successfully authenticated on sftp server');
 
-                    // Initialize SFTP subsystem
-                    $sftp = ssh2_sftp($connection);
+                // initialize SFTP subsystem
+                $sftp = ssh2_sftp($connection);
 
-                    // check if folder exist
-                    $folderExists = is_dir("ssh2.sftp://$sftp/$sourcePath");
-                    if ($folderExists) {
-                        Logger::debug('try to download from "' . $sourcePath . '" on sftp server');
-                        $success = self::downloadFolderFromSftpRecursively($sftp, $sourcePath, '/', $destPath);
+                // check if folder exist
+                $folderExists = is_dir("ssh2.sftp://$sftp/$sourcePath");
+                if ($folderExists) {
+                    Logger::debug('try to download from "' . $sourcePath . '" on sftp server');
+                    $success = self::downloadFolderFromSftpRecursively($sftp, $sourcePath, '/', $destPath);
 
-                        if ($success) {
-                            Logger::info('successfully downloaded files from sftp server');
+                    if ($success) {
+                        Logger::info('successfully downloaded files from sftp server');
 
-                            return true;
-                        }
-
-                        Logger::error('could not download files from sftp server');
-
-                        return false;
+                        return true;
                     }
 
-                    Logger::error('folder "' . $sourcePath . '" does not exist on ftp server');
+                    throw new \Exception('could not download files from sftp server');
                 }
 
-                Logger::error('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
-            } else {
-                Logger::error('unable to connect to sftp server: ' . $ftpHost . ':' . $ftpPort);
+                throw new \Exception('folder "' . $sourcePath . '" does not exist on sftp server');
             }
 
-            return false;
-
-        } catch (\Throwable $e) {
-            Logger::error($e->getMessage());
-
-            return false;
+            throw new \Exception('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
         }
+
+        throw new \Exception('unable to connect to sftp server: ' . $ftpHost . ':' . $ftpPort);
     }
 
 
@@ -318,6 +507,7 @@ class FTP {
      * @param int|null $ftpPort
      * @return bool
      * @throws \Exception
+     * @throws \Throwable
      */
     protected static function sendToFtp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
         try {
@@ -356,9 +546,7 @@ class FTP {
                         if (ftp_mkdir($connection, $destPath)) {
                             Logger::debug('successfully created folder "' . $destPath . '" on ftp server');
                         } else {
-                            Logger::error('could not create folder "' . $destPath . '" on ftp server');
-
-                            return false;
+                            throw new \Exception('could not create folder "' . $destPath . '" on ftp server');
                         }
                     }
                     ftp_pasv($connection, true);
@@ -372,25 +560,26 @@ class FTP {
                     if (ftp_put($connection, $destFile, $sourceFile)) {
                         Logger::debug('successfully uploaded file "' . $destFile . '" to ftp server');
                     } else {
-                        Logger::error('upload failed for file "' . $destFile . '" to ftp server');
+                        throw new \Exception('upload failed for file "' . $destFile . '" to ftp server');
                     }
 
                     // close connection
                     return ftp_close($connection);
-
                 }
 
-                Logger::error('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
-            } else {
-                Logger::error('unable to connect to ftp server: ' . $ftpHost . ':' . $ftpPort);
+                throw new \Exception('unable to authenticate on ftp server: ' . $ftpHost . ':' . $ftpPort);
             }
 
-            return false;
+            throw new \Exception('unable to connect to ftp server: ' . $ftpHost . ':' . $ftpPort);
 
         } catch (\Throwable $e) {
-            Logger::error($e->getMessage());
 
-            return false;
+            // close connection
+            if (isset($connection)) {
+                ftp_close($connection);
+            }
+
+            throw $e;
         }
     }
 
@@ -410,97 +599,83 @@ class FTP {
      * @throws \Exception
      */
     protected static function sendToSftp(string $instanceName, string $backupDir, string $fileName, string $ftpHost, string $ftpUsername, string $ftpPassword, string $ftpPath, ?int $ftpPort = null): bool {
-        try {
 
-            Logger::debug('start upload to sftp server');
+        Logger::debug('start upload to sftp server');
 
-            // define default port
-            if (!$ftpPort) {
-                $ftpPort = 22;
-            }
+        // define default port
+        if (!$ftpPort) {
+            $ftpPort = 22;
+        }
 
-            // set paths
-            $sourceFile = $backupDir . DIRECTORY_SEPARATOR . $fileName;
-            $destPath = $ftpPath . '/' . $instanceName;
-            $destFile = $destPath . '/' . $fileName;
+        // set paths
+        $sourceFile = $backupDir . DIRECTORY_SEPARATOR . $fileName;
+        $destPath = $ftpPath . '/' . $instanceName;
+        $destFile = $destPath . '/' . $fileName;
 
-            Logger::debug('try connect to sftp server');
+        Logger::debug('try connect to sftp server');
 
-            // connect to server
-            $connection = ssh2_connect($ftpHost, $ftpPort);
+        // connect to server
+        $connection = ssh2_connect($ftpHost, $ftpPort);
 
-            // check connection
-            if ($connection) {
-                Logger::debug('successfully connected to sftp server');
-                Logger::debug('try to authenticate on sftp server');
+        // check connection
+        if ($connection) {
+            Logger::debug('successfully connected to sftp server');
+            Logger::debug('try to authenticate on sftp server');
 
-                // login to server
-                if (ssh2_auth_password($connection, $ftpUsername, $ftpPassword)) {
-                    Logger::debug('successfully authenticated on sftp server');
+            // login to server
+            if (ssh2_auth_password($connection, $ftpUsername, $ftpPassword)) {
+                Logger::debug('successfully authenticated on sftp server');
 
-                    // Initialize SFTP subsystem
-                    $sftp = ssh2_sftp($connection);
+                // initialize SFTP subsystem
+                $sftp = ssh2_sftp($connection);
 
-                    // check if folder exist
-                    $folderExists = is_dir("ssh2.sftp://$sftp/" . $destPath);
-                    if (!$folderExists) {
-                        Logger::debug('try to create folder "' . $destPath . '" on sftp server');
+                // check if folder exist
+                $folderExists = is_dir("ssh2.sftp://$sftp/" . $destPath);
+                if (!$folderExists) {
+                    Logger::debug('try to create folder "' . $destPath . '" on sftp server');
 
-                        if (ssh2_sftp_mkdir($sftp, $destPath, true)) {
-                            Logger::debug('successfully created folder "' . $destPath . '" on sftp server');
-                        } else {
-                            Logger::error('could not create folder "' . $destPath . '" on sftp server');
-
-                            return false;
-                        }
-                    }
-
-                    // upload file
-                    $remFile = fopen("ssh2.sftp://$sftp/" . $destFile, 'wb');
-                    $srcFile = fopen($sourceFile, 'rb');
-
-                    if ($srcFile) {
-                        if ($remFile) {
-
-                            // get file size
-                            $fileSize = General::getFileSize($sourceFile);
-
-                            Logger::debug('start upload file "' . $destFile . '" to sftp server. file size: ' . $fileSize);
-
-                            if (stream_copy_to_stream($srcFile, $remFile)) {
-                                Logger::debug('successfully uploaded file "' . $destFile . '" to sftp server');
-                            } else {
-                                Logger::error('upload failed for file "' . $destFile . '" to sftp server');
-                            }
-
-                            // close files
-                            fclose($remFile);
-                            fclose($srcFile);
-
-                            return true;
-
-                        }
-
-                        Logger::error('unable to create file on sftp server: ' . $destFile);
+                    if (ssh2_sftp_mkdir($sftp, $destPath, true)) {
+                        Logger::debug('successfully created folder "' . $destPath . '" on sftp server');
                     } else {
-                        Logger::error('unable to open local file: ' . $sourceFile);
+                        throw new \Exception('could not create folder "' . $destPath . '" on sftp server');
                     }
-
-                    return false;
-
                 }
 
-                Logger::error('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
-            } else {
-                Logger::error('unable to connect to sftp server: ' . $ftpHost . ':' . $ftpPort);
+                // upload file
+                $remFile = fopen("ssh2.sftp://$sftp/" . $destFile, 'wb');
+                $srcFile = fopen($sourceFile, 'rb');
+
+                if ($srcFile) {
+                    if ($remFile) {
+
+                        // get file size
+                        $fileSize = General::getFileSize($sourceFile);
+
+                        Logger::debug('start upload file "' . $destFile . '" to sftp server. file size: ' . $fileSize);
+
+                        if (stream_copy_to_stream($srcFile, $remFile)) {
+                            Logger::debug('successfully uploaded file "' . $destFile . '" to sftp server');
+                        } else {
+                            throw new \Exception('upload failed for file "' . $destFile . '" to sftp server');
+                        }
+
+                        // close files
+                        fclose($remFile);
+                        fclose($srcFile);
+
+                        return true;
+
+                    }
+
+                    throw new \Exception('unable to create file on sftp server: ' . $destFile);
+                }
+
+                throw new \Exception('unable to open local file: ' . $sourceFile);
             }
 
-            return false;
-
-        } catch (\Throwable $e) {
-            Logger::error($e->getMessage());
-
-            return false;
+            throw new \Exception('unable to authenticate on sftp server: ' . $ftpHost . ':' . $ftpPort);
         }
+
+        throw new \Exception('unable to connect to sftp server: ' . $ftpHost . ':' . $ftpPort);
     }
 }

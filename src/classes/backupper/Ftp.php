@@ -17,7 +17,7 @@ class Ftp {
      * @param array $instances
      * @param array $ftpConfig
      * @return array
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     public static function createBackup(array $instances = [], array $ftpConfig = []): array {
         $files = [];
@@ -39,31 +39,38 @@ class Ftp {
                 classes\Logger::debug('start to zip folder "' . $tempDir . '"');
                 $fileName = classes\General::zipFolder($tempDir, $backupDir, $instanceName);
 
-                // get file size
-                $fileSize = classes\General::getFileSize($backupDir . DIRECTORY_SEPARATOR . $fileName);
-                classes\Logger::debug('finished zipping folder "' . $tempDir . '". file size: ' . $fileSize);
+                // on success
+                if ($fileName) {
+                    $files[$instanceName] = $fileName;
 
-                // delete temp folder
-                classes\Logger::debug('start to delete temp folder "' . $tempDir . '"');
-                classes\General::deleteFolder($tempDir);
-                classes\Logger::debug('finished deleting temp folder "' . $tempDir . '"');
+                    // get file size
+                    $fileSize = classes\General::getFileSize($backupDir . DIRECTORY_SEPARATOR . $fileName);
+                    classes\Logger::debug('finished zipping folder "' . $tempDir . '". file size: ' . $fileSize);
 
-                // set log msg
-                classes\Logger::info('folder "' . $instanceName . '" backuped successfully');
+                    // delete temp folder
+                    classes\Logger::debug('start to delete temp folder "' . $tempDir . '"');
+                    classes\General::deleteFolder($tempDir);
+                    classes\Logger::debug('finished deleting temp folder "' . $tempDir . '"');
 
-                // upload file to ftp server
-                if ($ftpConfig) {
-                    $uploaded = classes\FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
+                    // set log msg
+                    classes\Logger::info('folder "' . $instanceName . '" backuped successfully');
 
-                    if ($uploaded) {
-                        classes\Logger::info('folder Backup "' . $instanceName . '" uploaded to FTP server successfully');
-                    } else {
-                        classes\Logger::warning('folder Backup "' . $instanceName . '" uploaded to FTP server failed');
+                    // upload file to ftp server
+                    if ($ftpConfig) {
+                        $uploaded = classes\FTP::upload($instanceName, $backupDir, $fileName, $ftpConfig);
+
+                        if ($uploaded) {
+                            classes\Logger::info('folder Backup "' . $instanceName . '" uploaded to FTP server successfully');
+                        } else {
+                            classes\Logger::warning('folder Backup "' . $instanceName . '" uploaded to FTP server failed');
+                        }
                     }
+                } else {
+                    throw new \Exception('ftp "' . $instanceName . '" backup failed');
                 }
 
             } else {
-                classes\Logger::error('files from downloaded from FTP server failed');
+                throw new \Exception('files from downloaded from FTP server failed');
             }
         }
 

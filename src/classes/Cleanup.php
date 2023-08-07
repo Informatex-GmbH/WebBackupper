@@ -55,8 +55,62 @@ class Cleanup {
 
                         Logger::info('local backup folder from instance "' . $instanceName . '" cleaned up successfully');
                     } else {
-                        Logger::error('local backup folder from instance "' . $instanceName . '" does not exist');
+                        throw new \Exception('local backup folder from instance "' . $instanceName . '" does not exist');
                     }
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * cleans up remote folder
+     *
+     * @param array $instances
+     * @param array $ftpConfig
+     * @return bool
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public static function remoteFolder(array $instances, array $ftpConfig): bool {
+
+        // loop through all instanceTypes
+        foreach ($instances as $instanceType) {
+
+            // loop through all instances
+            if ($instanceType && is_array($instanceType)) {
+                foreach ($instanceType as $instanceName => $instance) {
+
+                    Logger::debug('start to clean up remote backup folder from instance "' . $instanceName . '"');
+
+                    foreach ($ftpConfig as $name => $config) {
+
+                        if (empty($name)) {
+                            $name = $config['host'];
+                        }
+
+                        Logger::debug('start to clean up ftp Server "' . $name . '"');
+
+                        // limit for remote backup copies
+                        $limit = $config['copiesCount'];
+
+                        // delete files from ftp folder
+                        if ($limit) {
+                            $success = FTP::delete($instanceName, $config, $limit);
+
+                            if ($success) {
+                                Logger::debug('successfully cleaned up ftp Server "' . $name . '"');
+                            } else {
+                                throw new \Exception('clean up ftp Server "' . $name . '" failed');
+                            }
+                        } else {
+                            Logger::debug('no need to cleaned up ftp Server "' . $name . '"');
+                        }
+                    }
+
+                    Logger::debug('clean up remote backup folder from instance "' . $instanceName . '" finished');
                 }
             }
         }

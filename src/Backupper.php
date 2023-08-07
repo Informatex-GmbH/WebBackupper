@@ -45,10 +45,11 @@ class Backupper {
      * @param array $instances
      * @param array $ftpConfig
      * @param bool  $cleanUpLocalFolder
+     * @param bool  $cleanUpRemoteFolder
      * @return array|false
      * @throws \Exception
      */
-    public function createBackup(array $instances, array $ftpConfig = [], bool $cleanUpLocalFolder = true): false|array {
+    public function createBackup(array $instances, array $ftpConfig = [], bool $cleanUpLocalFolder = true, bool $cleanUpRemoteFolder = true): false|array {
         try {
 
             $files = [];
@@ -81,6 +82,11 @@ class Backupper {
             // cleanup local folder
             if ($cleanUpLocalFolder) {
                 classes\Cleanup::localFolder($instances);
+            }
+
+            // cleanup remote folder
+            if ($cleanUpRemoteFolder && $ftpConfig) {
+                classes\Cleanup::remoteFolder($instances, $ftpConfig);
             }
 
             return $files;

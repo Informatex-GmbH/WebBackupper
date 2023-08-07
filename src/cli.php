@@ -11,10 +11,10 @@ try {
     $config = require __DIR__ . '/../config/config.php';
     require 'Backupper.php';
 
-// initialize backupper
+    // initialize backupper
     $backupper = new WebBackupper\Backupper($config);
 
-// declare instances from config
+    // declare instances from config
     $instances = [];
     $instances['wordpress'] = classes\General::getConfig('wordpress');
     $instances['webapps'] = classes\General::getConfig('webapps');
@@ -27,10 +27,10 @@ try {
         $ftpConfig = classes\General::getConfig('backupFtp, connections');
     }
 
-// create backups
+    // create backups
     $backupper->createBackup($instances, $ftpConfig);
 
-// send email to webmaster
+    // send email to webmaster
     if (classes\General::getConfig('system, sendLogEmail')) {
 
         // read email address of webmaster

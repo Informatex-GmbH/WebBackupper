@@ -18,12 +18,12 @@ class General {
 
         // check if folder exists
         if (!is_dir($fromFolder)) {
-            Logger::error('Folder "' . $fromFolder . '" does not exist');
+            throw new \Exception('Folder "' . $fromFolder . '" does not exist');
         }
 
         // create folder if not exists
         if (!is_dir($toFolder) && !mkdir($toFolder, 0777, true) && !is_dir($toFolder)) {
-            Logger::error('Folder "' . $toFolder . '" could not be created');
+            throw new \Exception('Folder "' . $toFolder . '" could not be created');
         }
 
         // open from folder

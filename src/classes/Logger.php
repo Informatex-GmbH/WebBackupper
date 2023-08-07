@@ -162,16 +162,12 @@ class Logger {
 
         // call callback function with args
         if (self::$callbackFunction) {
-            $functionArray = self::$callbackFunction;
-
-            $class = $functionArray[0];
-            $function = $functionArray[1];
-
-            $functionArgs = array_slice($functionArray, 2);
-            $args = array_merge(['entry' => $entry], $functionArgs[0]);
+            [$class, $function, $functionArgs] = self::$callbackFunction;
+            $args = array_merge(['entry' => $entry], $functionArgs);
 
             if (is_callable([$class, $function])) {
-                $class->$function($args);
+                $classInstance = new $class;
+                $classInstance->$function($args);
             }
         }
     }

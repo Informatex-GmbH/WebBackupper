@@ -55,9 +55,7 @@ class Folder {
                     }
                 }
             } else {
-
-                // set log msg
-                classes\Logger::error('folder "' . $instanceName . '" backup failed');
+                throw new \Exception('folder "' . $instanceName . '" backup failed');
             }
         }
 
@@ -95,7 +93,7 @@ class Folder {
                 classes\General::copyFolder($fromFolder, $toFolder);
                 classes\Logger::debug('finished copying folder "' . $fromFolder . '"');
             } else {
-                classes\Logger::error('folder "' . $folder . '" does not exist');
+                throw new \Exception('folder "' . $folder . '" does not exist');
             }
         }
 

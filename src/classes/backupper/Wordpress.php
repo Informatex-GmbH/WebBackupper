@@ -90,17 +90,15 @@ class Wordpress {
                             }
                         }
                     } else {
-
-                        // set log msg
-                        classes\Logger::error('wordpress instance "' . $instanceName . '" backup failed');
+                        throw new \Exception('wordpress instance "' . $instanceName . '" backup failed');
                     }
 
                 } else {
-                    classes\Logger::error('wordpress config file does not exist in folder: ' . $wpDirectory);
+                    throw new \Exception('wordpress config file does not exist in folder: ' . $wpDirectory);
                 }
 
             } else {
-                classes\Logger::error('folder "' . $wpDirectory . '" does not exist');
+                throw new \Exception('folder "' . $wpDirectory . '" does not exist');
             }
         }
 

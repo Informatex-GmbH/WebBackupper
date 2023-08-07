@@ -51,7 +51,7 @@ class Db {
             } else {
 
                 // set log msg
-                classes\Logger::error('Database "' . $instanceName . '" backup failed');
+                throw new \Exception('Database "' . $instanceName . '" backup failed');
             }
         }
 
@@ -105,16 +105,11 @@ class Db {
         if (file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf', $fileContent)) {
             classes\Logger::debug('successfully created db-access file for instance "' . $instanceName . '"');
         } else {
-            classes\Logger::error('db-access file for instance "' . $instanceName . '" could not be created');
+            throw new \Exception('db-access file for instance "' . $instanceName . '" could not be created');
         }
 
         // set variables for dump
         $variables = '--skip-opt --single-transaction --create-options --add-drop-table --set-charset --disable-keys --extended-insert --quick';
-
-        // on localhost add other variable for testing
-//        if ($_SERVER['REMOTE_ADDR'] === '::1') {
-//           $variables .= ' --column-statistics=0';
-//        }
 
         // command for create databse dump
         $command = classes\General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath . '"';
@@ -135,9 +130,7 @@ class Db {
 
         // log error when failed
         if ($status) {
-            classes\Logger::error('create DB-dump from instance "' . $instanceName . '" failed');
-
-            return '';
+            throw new \Exception('create DB-dump from instance "' . $instanceName . '" failed');
         }
 
         // get file size
