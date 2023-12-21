@@ -94,8 +94,6 @@ class Backupper {
         } catch (\Throwable $e) {
 
             $this->handleException($e);
-
-            return false;
         }
     }
 
@@ -208,5 +206,7 @@ class Backupper {
 
             error_log($message, 3, $file);
         }
+
+        throw $e;
     }
 }

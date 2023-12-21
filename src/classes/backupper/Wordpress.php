@@ -25,7 +25,7 @@ class Wordpress {
         foreach ($instances as $instanceName => $wpInstance) {
 
             if (is_array($wpInstance)) {
-                if (!$wpInstance['rootDirectory']) {
+                if (empty($wpInstance['rootDirectory'])) {
                     throw new \Exception('wrong config for wordpress instance "' . $instanceName . '"');
                 }
                 $wpDirectory = $wpInstance['rootDirectory'];

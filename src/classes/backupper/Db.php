@@ -111,8 +111,8 @@ class Db {
         // set variables for dump
         $variables = '--skip-opt --single-transaction --create-options --add-drop-table --set-charset --disable-keys --extended-insert --quick';
 
-        // command for create databse dump
-        $command = classes\General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' > "' . $sqlPath . '"';
+        // command for create database dump
+        $command = classes\General::getConfig('paths, mysqldump') . DIRECTORY_SEPARATOR . 'mysqldump --defaults-file="' . $backupDir . DIRECTORY_SEPARATOR . 'dbAccess.conf" ' . $variables . ' ' . $dbName . ' --result-file="' . $sqlPath . '"  2>&1';
 
         // execute command
         $response = [];
@@ -130,6 +130,9 @@ class Db {
 
         // log error when failed
         if ($status) {
+            if ($response) {
+                throw new \Exception('create DB-dump from instance "' . $instanceName . '" failed (' . implode(' | ', $response) . ')');
+            }
             throw new \Exception('create DB-dump from instance "' . $instanceName . '" failed');
         }
 

@@ -91,7 +91,7 @@ class Cleanup {
                             $name = $config['host'];
                         }
 
-                        Logger::debug('start to clean up ftp server "' . $name . '"');
+                        Logger::debug('start to clean up FTP Server"' . $name . '"');
 
                         // limit for remote backup copies
                         $limit = $config['copiesCount'];
@@ -101,12 +101,12 @@ class Cleanup {
                             $success = FTP::delete($instanceName, $config, $limit);
 
                             if ($success) {
-                                Logger::debug('successfully cleaned up ftp server "' . $name . '"');
+                                Logger::debug('successfully cleaned up FTP Server"' . $name . '"');
                             } else {
-                                throw new \Exception('clean up ftp server "' . $name . '" failed');
+                                throw new \Exception('clean up FTP Server"' . $name . '" failed');
                             }
                         } else {
-                            Logger::debug('no need to cleaned up ftp server "' . $name . '"');
+                            Logger::debug('no need to cleaned up FTP Server"' . $name . '"');
                         }
                     }
 
